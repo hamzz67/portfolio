@@ -1,0 +1,98 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import { KINDS, type Kind } from '@/data/taxonomy';
+import { getPresentationOrder, getProjectRef } from '@/lib/projects';
+import { formatMonthCap } from '@/lib/format';
+
+const order = await getPresentationOrder();
+const refs = await Promise.all(order.map((p) => getProjectRef(p)));
+const first = order[0];
+---
+
+<Base
+  title="Mode présentation"
+  description="Parcours guidé des travaux, pensé pour une présentation orale devant un jury : navigation au clavier entre fiches et sections."
+  noindex
+>
+  <section class="section section--tight">
+    <div class="container">
+      <SectionHead level="h1" index="→" label="Mode présentation" titleHtml="Présenter les travaux <span class='em'>devant un jury</span>">
+        Le mode présentation masque la navigation, agrandit le texte et permet de passer d’une section à l’autre au clavier. Ce n’est pas un diaporama : c’est le portfolio, en lecture guidée.
+      </SectionHead>
+
+      <div class="pres">
+        <div class="pres__main">
+          {order.length > 0 ? (
+            <ol class="pres__list reveal-group" role="list">
+              {order.map((p, i) => (
+                <li class="pres__item reveal" style={`--i:${i}`}>
+                  <span class="pres__num label label--accent">{String(i + 1).padStart(2, '0')}</span>
+                  <div class="pres__body">
+                    <p class="label">{refs[i]} · {KINDS[p.data.kind as Kind].label} · {formatMonthCap(p.data.date)}</p>
+                    <a href={`/travaux/${p.id}?presentation`} class="pres__title">{p.data.title}</a>
+                    <p class="pres__summary">{p.data.summary}</p>
+                  </div>
+                  <a href={`/travaux/${p.id}?presentation`} class="btn btn--secondary btn--sm" aria-label={`Présenter : ${p.data.title}`}>
+                    <Icon name="play" size={12} /> Présenter
+                  </a>
+                </li>
+              ))}
+            </ol>
+          ) : (
+            <EmptyState title="Aucune fiche à présenter" text="Ajoutez des fiches de travaux pour alimenter le mode présentation." file="src/content/projects/" />
+          )}
+        </div>
+
+        <aside class="pres__side reveal-group">
+          {first && (
+            <a href={`/travaux/${first.id}?presentation`} class="btn pres__start reveal">
+              <Icon name="presentation" size={16} /> Démarrer la présentation
+            </a>
+          )}
+          <div class="card pres__help reveal" style="--i:1">
+            <p class="label">Raccourcis clavier</p>
+            <dl>
+              <div><dt><kbd>↓</kbd> <kbd>Espace</kbd></dt><dd>Section suivante</dd></div>
+              <div><dt><kbd>↑</kbd></dt><dd>Section précédente</dd></div>
+              <div><dt><kbd>→</kbd></dt><dd>Fiche suivante</dd></div>
+              <div><dt><kbd>←</kbd></dt><dd>Fiche précédente</dd></div>
+              <div><dt><kbd>Échap</kbd></dt><dd>Quitter le mode</dd></div>
+            </dl>
+          </div>
+          <div class="card pres__help reveal" style="--i:2">
+            <p class="label">Ordre</p>
+            <p class="pres__note">Les fiches <code>featured</code> passent en premier, triées par <code>order</code>, puis les autres par date. Modifiable dans l’en-tête de chaque fiche.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .pres { display: grid; gap: var(--space-7); align-items: start; }
+  @media (min-width: 1024px) { .pres { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-8); } }
+  .pres__list { border-top: 1px solid var(--line-strong); }
+  .pres__item { display: grid; grid-template-columns: 2.5rem 1fr; gap: 0.75rem 1rem; padding: 1.25rem 0; border-bottom: 1px solid var(--line); align-items: start; }
+  @media (min-width: 720px) { .pres__item { grid-template-columns: 2.5rem 1fr auto; align-items: center; } }
+  .pres__num { font-size: var(--text-sm); padding-top: 0.2rem; }
+  .pres__body { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+  .pres__title { font-family: var(--font-display); font-size: var(--text-xl); line-height: 1.15; transition: color var(--dur-fast); }
+  .pres__title:hover { color: var(--accent); }
+  .pres__summary { font-size: var(--text-sm); color: var(--ink-2); max-width: 60ch; }
+  .pres__item > .btn { grid-column: 2; }
+  @media (min-width: 720px) { .pres__item > .btn { grid-column: auto; } }
+
+  .pres__side { display: flex; flex-direction: column; gap: var(--space-4); }
+  .pres__start { width: 100%; }
+  .pres__help { padding: 1.25rem; gap: 0.75rem; }
+  .pres__help dl { margin: 0; display: flex; flex-direction: column; gap: 0.5rem; }
+  .pres__help dl div { display: flex; justify-content: space-between; gap: 1rem; font-size: var(--text-sm); }
+  .pres__help dt { display: flex; gap: 0.25rem; }
+  .pres__help dd { margin: 0; color: var(--ink-2); }
+  .pres__help kbd { font-size: 0.7rem; padding: 0.15rem 0.45rem; border: 1px solid var(--line-strong); border-bottom-width: 2px; border-radius: 4px; background: var(--paper-2); }
+  .pres__note { font-size: var(--text-sm); color: var(--ink-2); }
+</style>

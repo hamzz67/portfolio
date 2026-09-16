@@ -1,0 +1,196 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import ProjectCard from '@/components/ProjectCard.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import { CATEGORIES, KINDS, kindKeys, categoryKeys } from '@/data/taxonomy';
+import { getProjects, getAllTechnologies, getAllYears, getAllContexts } from '@/lib/projects';
+import { slugify } from '@/lib/format';
+
+const projects = await getProjects();
+const technologies = await getAllTechnologies();
+const years = await getAllYears();
+const contexts = await getAllContexts();
+const usedCategories = categoryKeys.filter((c) =>
+  projects.some((p) => p.data.category === c || p.data.categories.includes(c)),
+);
+const countByKind = Object.fromEntries(kindKeys.map((k) => [k, projects.filter((p) => p.data.kind === k).length]));
+---
+
+<Base
+  title="Travaux — TP, stage et projets"
+  description="Bibliothèque de travaux de BTS SIO SISR : TP réseau et systèmes, stage, projets personnels. Filtrables par domaine, technologie, année et contexte."
+>
+  <section class="section section--tight">
+    <div class="container">
+      <SectionHead level="h1" index="01" label="Bibliothèque" titleHtml="Travaux, <span class='em'>fiches</span> et projets">
+        {projects.length} fiche{projects.length > 1 ? 's' : ''} publiée{projects.length > 1 ? 's' : ''}. Chaque fiche raconte le contexte, la démarche, les difficultés et le résultat.
+      </SectionHead>
+
+      <div class="lib" data-filters>
+        <!-- Barre de recherche -->
+        <div class="lib__search reveal">
+          <label class="search">
+            <Icon name="search" size={18} />
+            <span class="sr-only">Rechercher un travail</span>
+            <input type="search" name="q" placeholder="Rechercher : vlan, linux, cisco…" autocomplete="off" data-search-input />
+            <kbd aria-hidden="true">/</kbd>
+          </label>
+          <p class="lib__count label" data-count aria-live="polite">{projects.length} résultat{projects.length > 1 ? 's' : ''}</p>
+          <button type="button" class="btn btn--secondary btn--sm lib__toggle" data-filters-toggle aria-expanded="false" aria-controls="filters-panel">
+            <Icon name="filter" size={14} /> Filtres
+          </button>
+        </div>
+        <p class="lib__egg label" data-egg hidden aria-live="polite"></p>
+
+        <div class="lib__layout">
+          <!-- Filtres -->
+          <aside class="filters reveal" id="filters-panel" style="--i:1">
+            <div class="filters__group">
+              <p class="label">Nature</p>
+              <div class="filters__seg" role="group" aria-label="Nature">
+                <button type="button" class="chip chip--active" data-filter="kind" data-value="" aria-pressed="true">Tous <span class="filters__n">{projects.length}</span></button>
+                {kindKeys.map((k) => (
+                  <button type="button" class="chip" data-filter="kind" data-value={k} aria-pressed="false">
+                    {KINDS[k].short} <span class="filters__n">{countByKind[k]}</span>
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {usedCategories.length > 0 && (
+              <div class="filters__group">
+                <p class="label">Domaine</p>
+                <div class="chips" role="group" aria-label="Domaine">
+                  {usedCategories.map((c) => (
+                    <button type="button" class="chip" data-filter="category" data-value={c} aria-pressed="false">
+                      <Icon name={CATEGORIES[c].icon as any} size={12} /> {CATEGORIES[c].label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {technologies.length > 0 && (
+              <div class="filters__group">
+                <p class="label">Technologie</p>
+                <div class="chips" role="group" aria-label="Technologie">
+                  {technologies.map((t) => (
+                    <button type="button" class="chip" data-filter="tech" data-value={slugify(t)} aria-pressed="false">{t}</button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            <div class="filters__row">
+              {years.length > 0 && (
+                <label class="filters__select">
+                  <span class="label">Année</span>
+                  <select data-filter-select="year">
+                    <option value="">Toutes</option>
+                    {years.map((y) => <option value={y}>{y}</option>)}
+                  </select>
+                </label>
+              )}
+              {contexts.length > 0 && (
+                <label class="filters__select">
+                  <span class="label">Contexte</span>
+                  <select data-filter-select="context">
+                    <option value="">Tous</option>
+                    {contexts.map((c) => <option value={slugify(c)}>{c}</option>)}
+                  </select>
+                </label>
+              )}
+            </div>
+
+            <button type="button" class="btn btn--ghost btn--sm" data-filters-reset hidden>
+              <Icon name="x" size={14} /> Réinitialiser
+            </button>
+          </aside>
+
+          <!-- Résultats -->
+          <div class="lib__results">
+            {projects.length > 0 ? (
+              <>
+                <ul class="lib__grid reveal-group" role="list" data-results>
+                  {projects.map((p, i) => (
+                    <li class="reveal" style={`--i:${Math.min(i, 8)}`}>
+                      <ProjectCard project={p} index={i + 1} />
+                    </li>
+                  ))}
+                </ul>
+                <div class="lib__empty" data-empty hidden>
+                  <EmptyState label="Aucun résultat" title="Aucune fiche ne correspond à ces critères" text="Essayez un autre mot-clé ou retirez un filtre.">
+                    <button type="button" class="btn btn--secondary btn--sm" data-filters-reset style="margin-top: 1rem">Réinitialiser les filtres</button>
+                  </EmptyState>
+                </div>
+              </>
+            ) : (
+              <EmptyState
+                title="La bibliothèque est vide pour le moment"
+                text="Les TP et projets seront ajoutés au fil de la formation. Pour ajouter une fiche, copiez _TEMPLATE.md dans le dossier des projets."
+                file="src/content/projects/"
+              />
+            )}
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <script>
+    import { initFilters } from '@/scripts/filters';
+    document.addEventListener('astro:page-load', initFilters);
+  </script>
+</Base>
+
+<style>
+  .lib__search { display: flex; flex-wrap: wrap; align-items: center; gap: 1rem; margin-bottom: var(--space-4); }
+  .search {
+    flex: 1 1 320px;
+    display: flex; align-items: center; gap: 0.75rem;
+    padding: 0 1rem;
+    min-height: 3rem;
+    border: 1px solid var(--line-strong);
+    border-radius: var(--radius);
+    background: var(--paper-elev);
+    color: var(--ink-3);
+    transition: border-color var(--dur-fast), box-shadow var(--dur-fast);
+  }
+  .search:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-soft); color: var(--accent); }
+  .search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--ink); outline: none; font-size: var(--text-base); }
+  .search input::placeholder { color: var(--ink-4); }
+  .search input::-webkit-search-cancel-button { -webkit-appearance: none; }
+  .search kbd { font-size: 0.7rem; padding: 0.1rem 0.4rem; border: 1px solid var(--line); border-radius: 3px; color: var(--ink-4); }
+  .lib__count { margin-left: auto; }
+  .lib__toggle { display: inline-flex; }
+  .lib__egg { margin: -0.25rem 0 var(--space-4); color: var(--accent); text-transform: none; letter-spacing: 0.02em; }
+  .lib__egg[hidden] { display: none; }
+
+  .lib__layout { display: grid; gap: var(--space-6); align-items: start; }
+  @media (min-width: 1024px) {
+    .lib__layout { grid-template-columns: 260px minmax(0, 1fr); gap: var(--space-7); }
+    .lib__toggle { display: none; }
+    .filters { position: sticky; top: calc(var(--header-h) + 1rem); display: flex !important; }
+  }
+  .filters { display: none; flex-direction: column; gap: var(--space-5); padding: 1.25rem; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--paper-elev); }
+  .filters.is-open { display: flex; }
+  .filters__group .label { display: block; margin-bottom: 0.6rem; }
+  .filters__seg { display: flex; flex-wrap: wrap; gap: 0.375rem; }
+  .filters__n { font-size: 0.625rem; color: var(--ink-4); }
+  .chip--active .filters__n { color: inherit; opacity: 0.7; }
+  .filters button.chip { cursor: pointer; }
+  .filters__row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 0.75rem; }
+  .filters__select { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+  .filters__select select {
+    width: 100%; min-width: 0; min-height: 2.5rem; padding: 0 0.6rem;
+    border: 1px solid var(--line); border-radius: var(--radius);
+    background: var(--paper); color: var(--ink); font-size: var(--text-sm);
+  }
+
+  .lib__grid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); }
+  .lib__grid li { min-width: 0; }
+  .lib__grid li[hidden] { display: none; }
+  .lib__empty[hidden] { display: none; }
+</style>

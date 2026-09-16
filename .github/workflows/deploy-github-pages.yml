@@ -1,0 +1,52 @@
+# Déploiement automatique sur GitHub Pages à chaque push sur `main`.
+#
+# À activer dans le dépôt : Settings → Pages → Source : "GitHub Actions".
+# Si vous utilisez Cloudflare Pages (solution recommandée, voir DEPLOYMENT.md),
+# ce workflow est inutile : vous pouvez le supprimer ou le laisser désactivé.
+#
+# Variable optionnelle : Settings → Secrets and variables → Actions → Variables → SITE_URL
+# (ex. https://votre-domaine.fr). Sans domaine personnalisé, GitHub Pages sert le site
+# sous https://<utilisateur>.github.io/<depot>/ : il faut alors aussi définir `base` dans astro.config.mjs.
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: pages
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+      - run: npm ci
+      - run: npm run build
+        env:
+          SITE_URL: ${{ vars.SITE_URL }}
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - id: deployment
+        uses: actions/deploy-pages@v4

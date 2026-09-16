@@ -1,0 +1,39 @@
+---
+/**
+ * En-tête de section : index (01, 02…), étiquette, titre, note à droite.
+ * Le titre peut contenir un mot mis en italique accentuée via <span class="em">.
+ */
+interface Props {
+  index?: string;
+  label?: string;
+  title?: string;
+  /** HTML du titre (prioritaire sur `title`) pour insérer <span class="em">. */
+  titleHtml?: string;
+  id?: string;
+  level?: 'h1' | 'h2';
+}
+const { index, label, title, titleHtml, id, level = 'h2' } = Astro.props;
+const Tag = level;
+---
+
+<div class="section-head reveal-group" id={id}>
+  <div>
+    {(index || label) && (
+      <p class="section-head__index reveal">
+        <span class="mark"></span>
+        {index && <span class="label label--ink">{index}</span>}
+        {label && <span class="label">{label}</span>}
+      </p>
+    )}
+    {titleHtml ? (
+      <Tag class="section-head__title reveal" set:html={titleHtml} />
+    ) : (
+      <Tag class="section-head__title reveal">{title}</Tag>
+    )}
+  </div>
+  {Astro.slots.has('default') && (
+    <div class="section-head__aside reveal">
+      <slot />
+    </div>
+  )}
+</div>

@@ -1,0 +1,32 @@
+---
+/**
+ * Découpe un texte en mots pour une apparition mot à mot (masque + translation).
+ * Chaque mot est dans un <span class="split"><span>mot</span></span>.
+ * Le texte reste lisible tel quel par les lecteurs d'écran et sans JavaScript.
+ *
+ * Usage : <SplitText text="Hamza Jallabi" delay={200} />
+ */
+interface Props {
+  text: string;
+  /** Délai initial en ms. */
+  delay?: number;
+  /** Indice de départ (pour enchaîner plusieurs SplitText). */
+  start?: number;
+  /** Mots à mettre en italique accentuée (indices, base 0). */
+  em?: number[];
+}
+const { text, delay = 0, start = 0, em = [] } = Astro.props;
+const words = text.split(/\s+/).filter(Boolean);
+---
+
+<span class="split-wrap">
+  <span class="sr-only">{text}</span>
+  {words.map((word, i) => (
+    <>
+      <span class="split" aria-hidden="true" style={`--i:${start + i};--delay:${delay}ms`}>
+        <span class:list={{ em: em.includes(i) }}>{word}</span>
+      </span>
+      {i < words.length - 1 && <span aria-hidden="true"> </span>}
+    </>
+  ))}
+</span>

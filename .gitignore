@@ -1,0 +1,22 @@
+# Dépendances
+node_modules/
+
+# Build
+dist/
+.astro/
+
+# Environnement (jamais de secrets dans le dépôt)
+.env
+.env.*
+!.env.example
+
+# Système / éditeurs
+.DS_Store
+Thumbs.db
+*.log
+.vscode/*
+!.vscode/extensions.json
+.idea/
+
+# Documents privés (brouillons non publiables — voir CONTENT-SAFETY.md)
+private/

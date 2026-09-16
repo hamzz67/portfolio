@@ -1,0 +1,76 @@
+---
+import Icon from '@/components/Icon.astro';
+import { timeline, resolveStatus } from '@/data/timeline';
+
+interface Props {
+  /** Version compacte (accueil). */
+  compact?: boolean;
+}
+const { compact = false } = Astro.props;
+const statusLabel = { done: 'Réalisé', current: 'En cours', planned: 'Prévu' } as const;
+---
+
+<ol class:list={['tl', { 'tl--compact': compact }]} role="list">
+  {timeline.map((item, i) => {
+    const status = resolveStatus(item);
+    return (
+      <li class:list={['tl__item reveal', `tl__item--${status}`, { 'tl__item--highlight': item.highlight }]} style={`--i:${i}`}>
+        <div class="tl__date">
+          <span class="tl__dot" aria-hidden="true"></span>
+          <time class="label label--ink" datetime={item.iso}>{item.date}</time>
+          <span class="tl__status label">{statusLabel[status]}</span>
+        </div>
+        <div class="tl__body">
+          <h3 class="tl__title">
+            {item.href ? <a href={item.href}>{item.title}<Icon name="arrow-up-right" size={16} /></a> : item.title}
+          </h3>
+          {item.place && <p class="tl__place label">{item.place}</p>}
+          {!compact && item.description && <p class="tl__desc">{item.description}</p>}
+        </div>
+      </li>
+    );
+  })}
+</ol>
+
+<style>
+  .tl { position: relative; display: flex; flex-direction: column; }
+  .tl__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0.5rem 2rem;
+    padding: 1.25rem 0 1.25rem 1.75rem;
+    border-left: 1px solid var(--line-strong);
+  }
+  .tl__item:last-child { padding-bottom: 0; }
+  @media (min-width: 720px) {
+    .tl__item { grid-template-columns: 11rem 1fr; padding-left: 2.25rem; }
+  }
+  .tl__date { display: flex; flex-direction: column; gap: 0.25rem; }
+  .tl__dot {
+    position: absolute;
+    left: -5px; top: 1.55rem;
+    width: 9px; height: 9px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 1px solid var(--ink);
+    transition: background var(--dur), border-color var(--dur), box-shadow var(--dur);
+  }
+  .tl__item--done .tl__dot { background: var(--ink); }
+  .tl__item--current .tl__dot { background: var(--accent); border-color: var(--accent); box-shadow: 0 0 0 4px var(--accent-soft); }
+  .tl__item--planned .tl__dot { border-style: dashed; border-color: var(--ink-3); }
+  .tl__item--current .tl__status { color: var(--accent); }
+  .tl__item--planned .tl__status { color: var(--ink-4); }
+  .tl__item--planned .tl__title { color: var(--ink-2); }
+
+  .tl__title { font-size: var(--text-lg); }
+  .tl__title a { display: inline-flex; align-items: center; gap: 0.35rem; transition: color var(--dur-fast); }
+  .tl__title a:hover { color: var(--accent); }
+  .tl__item--highlight .tl__title { color: var(--accent); }
+  .tl__item--highlight .tl__title a { font-style: italic; }
+  .tl__place { margin-top: 0.3rem; text-transform: none; letter-spacing: 0.02em; }
+  .tl__desc { margin-top: 0.5rem; color: var(--ink-2); font-size: var(--text-sm); max-width: 56ch; }
+
+  .tl--compact .tl__item { padding-block: 0.9rem; }
+  .tl--compact .tl__title { font-size: var(--text-base); font-family: var(--font-sans); font-weight: 600; }
+</style>

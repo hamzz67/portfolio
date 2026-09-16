@@ -1,0 +1,207 @@
+---
+import Icon from '@/components/Icon.astro';
+import Logo from '@/components/Logo.astro';
+import { profile } from '@/data/profile';
+
+const nav = [
+  { href: '/travaux', label: 'Travaux', index: '01' },
+  { href: '/parcours', label: 'Parcours', index: '02' },
+  { href: '/competences', label: 'Compétences', index: '03' },
+  { href: '/galerie', label: 'Galerie', index: '04' },
+  { href: '/documents', label: 'Documents', index: '05' },
+  { href: '/#contact', label: 'Contact', index: '06' },
+];
+
+const path = Astro.url.pathname.replace(/\/$/, '') || '/';
+const isActive = (href: string) => href !== '/#contact' && (path === href || path.startsWith(href + '/'));
+---
+
+<header class="header" id="site-header">
+  <div class="container header__inner">
+    <a href="/" class="header__brand" aria-label={`${profile.name} — accueil`}>
+      <Logo />
+      <span class="header__name">
+        <span class="header__name-main">{profile.name}</span>
+        <span class="header__name-sub label">BTS SIO SISR</span>
+      </span>
+    </a>
+
+    <nav class="header__nav" aria-label="Navigation principale">
+      <ul role="list">
+        {nav.map((item) => (
+          <li>
+            <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined} data-index={item.index}>
+              {item.label}
+            </a>
+          </li>
+        ))}
+      </ul>
+    </nav>
+
+    <div class="header__tools">
+      <a href="/presentation" class="header__tool" title="Mode présentation" aria-label="Mode présentation">
+        <Icon name="presentation" size={18} />
+      </a>
+      <button class="header__tool" type="button" data-theme-toggle aria-label="Changer de thème" title="Changer de thème">
+        <Icon name="sun" size={18} class="theme-icon theme-icon--sun" />
+        <Icon name="moon" size={18} class="theme-icon theme-icon--moon" />
+      </button>
+      <button class="header__tool header__burger" type="button" data-menu-toggle aria-expanded="false" aria-controls="mobile-menu" aria-label="Ouvrir le menu">
+        <Icon name="menu" size={20} class="burger-open" />
+        <Icon name="x" size={20} class="burger-close" />
+      </button>
+    </div>
+  </div>
+
+  <div class="menu" id="mobile-menu" hidden>
+    <nav aria-label="Navigation mobile" class="container">
+      <ul role="list">
+        {nav.map((item, i) => (
+          <li style={`--i:${i}`}>
+            <a href={item.href} aria-current={isActive(item.href) ? 'page' : undefined}>
+              <span class="label">{item.index}</span>
+              <span class="menu__label">{item.label}</span>
+              <Icon name="arrow-up-right" size={22} />
+            </a>
+          </li>
+        ))}
+        <li style={`--i:${nav.length}`}>
+          <a href="/presentation">
+            <span class="label">→</span>
+            <span class="menu__label">Mode présentation</span>
+            <Icon name="presentation" size={22} />
+          </a>
+        </li>
+      </ul>
+      <p class="menu__foot label">{profile.school} · {profile.city}</p>
+    </nav>
+  </div>
+</header>
+
+<style>
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: color-mix(in srgb, var(--paper) 82%, transparent);
+    backdrop-filter: blur(12px) saturate(1.2);
+    -webkit-backdrop-filter: blur(12px) saturate(1.2);
+    border-bottom: 1px solid var(--line);
+    transition: background var(--dur), border-color var(--dur);
+  }
+  .header__inner {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-4);
+    height: var(--header-h);
+  }
+  .header__brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.75rem;
+    min-width: 0;
+  }
+  .header__name { display: flex; flex-direction: column; line-height: 1.1; }
+  .header__name-main { font-family: var(--font-display); font-size: 1.125rem; font-weight: 500; letter-spacing: -0.01em; white-space: nowrap; }
+  .header__name-sub { font-size: 0.625rem; }
+
+  .header__nav { display: none; }
+  .header__nav ul { display: flex; gap: 0.25rem; }
+  .header__nav a {
+    position: relative;
+    display: inline-flex;
+    align-items: baseline;
+    gap: 0.4rem;
+    padding: 0.5rem 0.75rem;
+    font-size: var(--text-sm);
+    font-weight: 500;
+    color: var(--ink-2);
+    border-radius: var(--radius);
+    transition: color var(--dur-fast), background var(--dur-fast);
+  }
+  .header__nav a::before {
+    content: attr(data-index);
+    font-family: var(--font-mono);
+    font-size: 0.625rem;
+    color: var(--ink-4);
+    letter-spacing: 0.06em;
+    transition: color var(--dur-fast);
+  }
+  .header__nav a:hover { color: var(--ink); background: var(--paper-2); }
+  .header__nav a:hover::before { color: var(--accent); }
+  .header__nav a[aria-current='page'] { color: var(--ink); }
+  .header__nav a[aria-current='page']::before { color: var(--accent); }
+  .header__nav a[aria-current='page']::after {
+    content: '';
+    position: absolute;
+    left: 0.75rem; right: 0.75rem; bottom: 0.2rem;
+    height: 1px;
+    background: var(--accent);
+  }
+
+  .header__tools { display: flex; align-items: center; gap: 0.25rem; }
+  .header__tool {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.5rem; height: 2.5rem;
+    border-radius: var(--radius);
+    color: var(--ink-2);
+    transition: color var(--dur-fast), background var(--dur-fast);
+  }
+  .header__tool:hover { color: var(--ink); background: var(--paper-2); }
+
+  /* Icône de thème : soleil en mode sombre, lune en mode clair */
+  /* Les icônes sont rendues par <Icon /> (autre composant) : sélecteurs globaux nécessaires */
+  .header__tool :global(.theme-icon--moon) { display: block; }
+  .header__tool :global(.theme-icon--sun) { display: none; }
+  :global(:root[data-theme='dark']) .header__tool :global(.theme-icon--moon) { display: none; }
+  :global(:root[data-theme='dark']) .header__tool :global(.theme-icon--sun) { display: block; }
+  @media (prefers-color-scheme: dark) {
+    :global(:root:not([data-theme='light'])) .header__tool :global(.theme-icon--moon) { display: none; }
+    :global(:root:not([data-theme='light'])) .header__tool :global(.theme-icon--sun) { display: block; }
+  }
+
+  .header__burger :global(.burger-close) { display: none; }
+  .header__burger[aria-expanded='true'] :global(.burger-open) { display: none; }
+  .header__burger[aria-expanded='true'] :global(.burger-close) { display: block; }
+
+  /* Menu mobile plein écran */
+  .menu {
+    position: fixed;
+    inset: var(--header-h) 0 0 0;
+    background: var(--paper);
+    z-index: 90;
+    overflow-y: auto;
+    padding-block: var(--space-6);
+  }
+  .menu[hidden] { display: none; }
+  .menu ul { display: flex; flex-direction: column; }
+  .menu li {
+    border-top: 1px solid var(--line);
+    animation: fade-up 500ms var(--ease-out) both;
+    animation-delay: calc(var(--i) * 50ms);
+  }
+  .menu li:last-child { border-bottom: 1px solid var(--line); }
+  .menu a {
+    display: grid;
+    grid-template-columns: 2.5rem 1fr auto;
+    align-items: center;
+    gap: var(--space-3);
+    padding: 1.1rem 0;
+    font-family: var(--font-display);
+    font-size: var(--text-xl);
+    color: var(--ink);
+  }
+  .menu a[aria-current='page'] .menu__label { color: var(--accent); font-style: italic; }
+  .menu__foot { margin-top: var(--space-6); }
+
+  @media (min-width: 1024px) {
+    .header__nav { display: block; }
+    .header__burger { display: none; }
+    .menu { display: none !important; }
+  }
+
+  :global(body.menu-open) { overflow: hidden; }
+</style>

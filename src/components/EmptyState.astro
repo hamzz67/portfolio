@@ -1,0 +1,32 @@
+---
+/**
+ * État vide propre : utilisé quand une section n'a pas encore de contenu.
+ * Indique où ajouter le contenu (fichier), sans inventer quoi que ce soit.
+ */
+interface Props {
+  title: string;
+  text?: string;
+  /** Fichier à modifier pour ajouter du contenu. */
+  file?: string;
+  label?: string;
+}
+const { title, text, file, label = 'À venir' } = Astro.props;
+---
+
+<div class="placeholder reveal">
+  <span class="label">{label}</span>
+  <p class="placeholder__title">{title}</p>
+  {text && <p class="placeholder__text">{text}</p>}
+  {file && (
+    <p class="placeholder__file label">
+      <span class="todo">TODO</span> ajouter dans <code>{file}</code>
+    </p>
+  )}
+  <slot />
+</div>
+
+<style>
+  .placeholder__text { max-width: 56ch; font-size: var(--text-sm); }
+  .placeholder__file { margin-top: var(--space-4); text-transform: none; letter-spacing: 0.02em; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
+  .placeholder__file code { font-size: var(--text-xs); }
+</style>

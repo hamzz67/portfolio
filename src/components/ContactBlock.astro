@@ -1,0 +1,85 @@
+---
+/**
+ * Bloc contact pour site statique : aucun backend.
+ * E-mail (avec bouton copier), GitHub, LinkedIn, CV. Les valeurs TODO sont
+ * affichées comme placeholders, jamais comme de faux liens.
+ */
+import Icon from '@/components/Icon.astro';
+import { profile, isPlaceholder } from '@/data/profile';
+
+const email = isPlaceholder(profile.links.email) ? undefined : profile.links.email;
+const github = isPlaceholder(profile.links.github) ? undefined : profile.links.github;
+const linkedin = isPlaceholder(profile.links.linkedin) ? undefined : profile.links.linkedin;
+const cv = profile.links.cv;
+
+const cards = [
+  {
+    icon: 'mail' as const,
+    label: 'E-mail',
+    value: email,
+    href: email ? `mailto:${email}` : undefined,
+    todo: 'Adresse e-mail professionnelle',
+    copy: email,
+  },
+  { icon: 'github' as const, label: 'GitHub', value: github?.replace(/^https?:\/\//, ''), href: github, todo: 'Lien GitHub' },
+  { icon: 'linkedin' as const, label: 'LinkedIn', value: linkedin?.replace(/^https?:\/\//, ''), href: linkedin, todo: 'Lien LinkedIn' },
+  { icon: 'file-text' as const, label: 'CV', value: cv ? 'Télécharger (PDF)' : undefined, href: cv, todo: 'CV public (version sans coordonnées personnelles)', download: true },
+];
+---
+
+<div class="contact reveal-group">
+  <ul class="contact__list" role="list">
+    {cards.map((c, i) => (
+      <li class:list={['card contact__item reveal', { 'contact__item--todo': !c.href }]} style={`--i:${i}`}>
+        <span class="contact__icon"><Icon name={c.icon} size={20} strokeWidth={1.5} /></span>
+        <span class="contact__label label">{c.label}</span>
+        {c.href ? (
+          <a
+            href={c.href}
+            class="contact__value"
+            target={c.href.startsWith('http') ? '_blank' : undefined}
+            rel={c.href.startsWith('http') ? 'me noopener' : undefined}
+            download={c.download ? '' : undefined}
+          >
+            {c.value}
+            <Icon name={c.download ? 'download' : c.href.startsWith('http') ? 'arrow-up-right' : 'arrow-right'} size={16} />
+          </a>
+        ) : (
+          <span class="contact__value contact__value--todo"><span class="todo">TODO</span> {c.todo}</span>
+        )}
+        {c.copy && (
+          <button type="button" class="btn btn--ghost btn--sm contact__copy" data-copy={c.copy} aria-label={`Copier l'adresse ${c.copy}`}>
+            <Icon name="copy" size={14} /> <span data-copy-label>Copier</span>
+          </button>
+        )}
+      </li>
+    ))}
+  </ul>
+
+  <div class="contact__note reveal" style="--i:4">
+    <p class="label">Note</p>
+    <p>
+      Ce site est statique et ne collecte aucune donnée. Pour me contacter, utilisez l’e-mail ou LinkedIn.
+      Les coordonnées personnelles (adresse, téléphone) ne sont pas publiées.
+    </p>
+  </div>
+</div>
+
+<style>
+  .contact { display: grid; gap: var(--space-6); }
+  @media (min-width: 900px) { .contact { grid-template-columns: minmax(0, 8fr) minmax(0, 4fr); gap: var(--space-8); } }
+
+  .contact__list { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); }
+  .contact__item { padding: 1.25rem; gap: 0.5rem; display: grid; grid-template-columns: auto 1fr auto; grid-template-areas: 'icon label copy' 'icon value copy'; align-items: center; column-gap: 1rem; }
+  .contact__icon { grid-area: icon; color: var(--accent); display: inline-flex; align-items: center; justify-content: center; width: 2.75rem; height: 2.75rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper-2); }
+  .contact__label { grid-area: label; }
+  .contact__value { grid-area: value; display: inline-flex; align-items: center; gap: 0.4rem; font-weight: 500; color: var(--ink); word-break: break-all; transition: color var(--dur-fast); }
+  a.contact__value:hover { color: var(--accent); }
+  .contact__value--todo { color: var(--ink-3); font-weight: 400; font-size: var(--text-sm); }
+  .contact__item--todo { border-style: dashed; }
+  .contact__copy { grid-area: copy; }
+  .contact__copy.is-copied { color: var(--accent); }
+
+  .contact__note { color: var(--ink-2); font-size: var(--text-sm); border-left: 1px solid var(--line-strong); padding-left: 1.25rem; align-self: start; }
+  .contact__note .label { display: block; margin-bottom: 0.5rem; }
+</style>

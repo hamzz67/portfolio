@@ -1,0 +1,139 @@
+---
+import { Image } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import Lightbox from '@/components/Lightbox.astro';
+import { galleryItems, galleryCategories } from '@/data/gallery';
+import { getProjects } from '@/lib/projects';
+
+interface Item {
+  src: ImageMetadata;
+  alt: string;
+  caption?: string;
+  category: string;
+  source?: { title: string; href: string };
+}
+
+/* Images « libres » : src/assets/gallery/ + liste dans src/data/gallery.ts */
+const files = import.meta.glob<{ default: ImageMetadata }>('/src/assets/gallery/*.{png,jpg,jpeg,webp,avif,gif}', { eager: true });
+const standalone: Item[] = galleryItems.flatMap((g) => {
+  const mod = files[`/src/assets/gallery/${g.file}`];
+  if (!mod) {
+    console.warn(`[galerie] fichier introuvable : src/assets/gallery/${g.file}`);
+    return [];
+  }
+  return [{ src: mod.default, alt: g.alt, caption: g.caption, category: g.category }];
+});
+
+/* Images des fiches (ajoutées automatiquement) */
+const projects = await getProjects();
+const fromProjects: Item[] = projects.flatMap((p) =>
+  p.data.images.map((img) => ({
+    src: img.src,
+    alt: img.alt,
+    caption: img.caption,
+    category: 'capture',
+    source: { title: p.data.title, href: `/travaux/${p.id}` },
+  })),
+);
+
+const items = [...fromProjects, ...standalone];
+const usedCategories = Object.entries(galleryCategories).filter(([key]) => items.some((i) => i.category === key));
+---
+
+<Base
+  title="Galerie — captures, schémas et architectures"
+  description="Galerie visuelle : captures d’écran, schémas réseau, architectures et interfaces issus des travaux de BTS SIO SISR et des projets personnels."
+>
+  <section class="section section--tight">
+    <div class="container">
+      <SectionHead level="h1" index="04" label="Galerie" titleHtml="Captures, <span class='em'>schémas</span> et architectures">
+        {items.length} image{items.length > 1 ? 's' : ''}. Les images des fiches de travaux sont ajoutées automatiquement.
+      </SectionHead>
+
+      {items.length > 0 ? (
+        <>
+          {usedCategories.length > 1 && (
+            <div class="gfilters chips reveal" role="group" aria-label="Filtrer la galerie">
+              <button type="button" class="chip chip--active" data-gfilter="" aria-pressed="true">Tout</button>
+              {usedCategories.map(([key, label]) => (
+                <button type="button" class="chip" data-gfilter={key} aria-pressed="false">{label}</button>
+              ))}
+            </div>
+          )}
+
+          <ul class="gallery reveal-group" role="list" data-gallery>
+            {items.map((item, i) => (
+              <li class="gallery__item reveal" data-category={item.category} style={`--i:${Math.min(i, 8)}`}>
+                <a
+                  href={item.src.src}
+                  class="gallery__link"
+                  data-lightbox
+                  data-caption={item.caption ?? item.alt}
+                  aria-label={`Agrandir : ${item.alt}`}
+                >
+                  <Image src={item.src} alt={item.alt} width={800} widths={[480, 800, 1200]} sizes="(min-width: 1024px) 33vw, (min-width: 640px) 50vw, 100vw" loading="lazy" />
+                  <span class="gallery__zoom" aria-hidden="true"><Icon name="maximize" size={16} /></span>
+                </a>
+                <div class="gallery__meta">
+                  <span class="label">{galleryCategories[item.category as keyof typeof galleryCategories]}</span>
+                  {item.caption && <p class="gallery__caption">{item.caption}</p>}
+                  {item.source && <a href={item.source.href} class="gallery__source label">{item.source.title} <Icon name="arrow-up-right" size={11} /></a>}
+                </div>
+              </li>
+            ))}
+          </ul>
+        </>
+      ) : (
+        <EmptyState
+          title="La galerie est vide pour le moment"
+          text="Deux façons d’ajouter des images : le champ images d’une fiche de travail (ajout automatique), ou une image libre déposée dans src/assets/gallery/ et déclarée dans src/data/gallery.ts. Toujours anonymiser les captures avant publication."
+          file="src/data/gallery.ts"
+        />
+      )}
+    </div>
+  </section>
+
+  <Lightbox />
+
+  <script>
+    import { initLightbox } from '@/scripts/lightbox';
+    document.addEventListener('astro:page-load', () => {
+      initLightbox();
+      const buttons = document.querySelectorAll<HTMLButtonElement>('[data-gfilter]');
+      const items = document.querySelectorAll<HTMLElement>('[data-gallery] > li');
+      buttons.forEach((b) =>
+        b.addEventListener('click', () => {
+          const v = b.dataset.gfilter ?? '';
+          buttons.forEach((o) => {
+            const on = o === b;
+            o.classList.toggle('chip--active', on);
+            o.setAttribute('aria-pressed', String(on));
+          });
+          items.forEach((it) => (it.hidden = !!v && it.dataset.category !== v));
+        }),
+      );
+    });
+  </script>
+</Base>
+
+<style>
+  .gfilters { margin-bottom: var(--space-5); }
+  .gallery { columns: 1; column-gap: var(--space-4); }
+  @media (min-width: 640px) { .gallery { columns: 2; } }
+  @media (min-width: 1024px) { .gallery { columns: 3; } }
+  .gallery__item { break-inside: avoid; margin-bottom: var(--space-4); }
+  .gallery__item[hidden] { display: none; }
+  .gallery__link { position: relative; display: block; overflow: hidden; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--paper-2); }
+  .gallery__link :global(img) { width: 100%; height: auto; transition: transform 800ms var(--ease-out); }
+  .gallery__link:hover :global(img) { transform: scale(1.03); }
+  .gallery__zoom { position: absolute; right: 0.6rem; bottom: 0.6rem; display: inline-flex; padding: 0.4rem; background: var(--paper-elev); border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink-2); opacity: 0; transition: opacity var(--dur-fast); }
+  .gallery__link:hover .gallery__zoom, .gallery__link:focus-visible .gallery__zoom { opacity: 1; }
+  .gallery__meta { padding: 0.6rem 0.25rem 0; display: flex; flex-direction: column; gap: 0.25rem; }
+  .gallery__caption { font-size: var(--text-sm); color: var(--ink-2); }
+  .gallery__source { display: inline-flex; align-items: center; gap: 0.25rem; text-transform: none; letter-spacing: 0.02em; }
+  .gallery__source:hover { color: var(--accent); }
+</style>

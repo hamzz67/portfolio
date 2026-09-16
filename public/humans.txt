@@ -1,0 +1,10 @@
+/* TEAM */
+  Conception, contenu : Hamza Jallabi — étudiant en BTS SIO SISR, Strasbourg
+  Direction artistique : « Dossier technique » (papier, encre, outremer)
+
+/* SITE */
+  Stack : Astro · TypeScript · CSS moderne (aucun framework CSS, aucune bibliothèque d'animation)
+  Polices : Fraunces, Instrument Sans, JetBrains Mono (auto-hébergées, licence OFL)
+  Icônes : Lucide (ISC), tracés inline
+  Hébergement : statique (Cloudflare Pages / GitHub Pages)
+  Respecte prefers-reduced-motion et prefers-color-scheme

@@ -1,0 +1,12 @@
+# security.txt — RFC 9116
+# Ce site est un portfolio statique : aucune donnée personnelle collectée, aucun backend.
+# Si vous trouvez malgré tout un problème (contenu sensible exposé, lien cassé, en-tête manquant),
+# merci de me le signaler.
+
+# TODO : remplacer par votre adresse e-mail professionnelle (mailto:) ou un lien de contact.
+Contact: https://example.com/#contact
+Preferred-Languages: fr, en
+# TODO : mettre à jour la date d'expiration (format ISO 8601, un an maximum recommandé).
+Expires: 2027-09-01T00:00:00.000Z
+
+# Bravo d'être venu jusqu'ici. Le bon réflexe, c'est de chercher ce fichier en premier.

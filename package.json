@@ -1,0 +1,30 @@
+{
+  "name": "portfolio-hamza",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "description": "Portfolio numérique de Hamza Jallabi — BTS SIO SISR",
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro check && astro build",
+    "build:only": "astro build",
+    "preview": "astro preview",
+    "check": "astro check",
+    "icons": "node scripts/generate-icons.mjs"
+  },
+  "dependencies": {
+    "@astrojs/sitemap": "^3.7.4",
+    "@fontsource-variable/fraunces": "^5.3.0",
+    "@fontsource-variable/instrument-sans": "^5.3.0",
+    "@fontsource-variable/jetbrains-mono": "^5.3.0",
+    "astro": "^7.3.2",
+    "sharp": "^0.35.4"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.10",
+    "typescript": "^6.0.3"
+  },
+  "engines": {
+    "node": ">=22.12.0"
+  }
+}

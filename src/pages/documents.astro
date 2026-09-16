@@ -1,0 +1,108 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import EmptyState from '@/components/EmptyState.astro';
+import { documents, documentCategories } from '@/data/documents';
+import { profile } from '@/data/profile';
+import { formatMonthCap } from '@/lib/format';
+import { getProjects } from '@/lib/projects';
+
+/* Documents déclarés dans src/data/documents.ts + documents joints aux fiches */
+const projects = await getProjects();
+const fromProjects = projects.flatMap((p) =>
+  p.data.documents.map((doc) => ({
+    title: doc.label,
+    href: doc.href,
+    category: 'technique' as const,
+    description: `Joint à la fiche « ${p.data.title} »`,
+    format: doc.type,
+    source: { title: p.data.title, href: `/travaux/${p.id}` },
+  })),
+);
+const all = [
+  ...(profile.links.cv ? [{ title: 'Curriculum vitae', href: profile.links.cv, category: 'cv' as const, description: 'Version publique, sans coordonnées personnelles.', format: 'PDF' }] : []),
+  ...documents,
+  ...fromProjects,
+];
+const groups = Object.entries(documentCategories)
+  .map(([key, label]) => ({ key, label, items: all.filter((d) => d.category === key) }))
+  .filter((g) => g.items.length > 0);
+const isPdf = (href: string) => href.toLowerCase().endsWith('.pdf');
+---
+
+<Base
+  title="Documents — rapports, dossiers et schémas"
+  description="Documents publics : rapports de stage, dossiers techniques, schémas et CV, en version vérifiée sans donnée sensible."
+>
+  <section class="section section--tight">
+    <div class="container">
+      <SectionHead level="h1" index="05" label="Documents" titleHtml="Rapports, dossiers et <span class='em'>documents</span> techniques">
+        Chaque document publié ici est une version « public-safe » : anonymisée, sans identifiant ni donnée interne.
+      </SectionHead>
+
+      {groups.length > 0 ? (
+        <div class="docs reveal-group">
+          {groups.map((g) => (
+            <section class="docs__group" aria-labelledby={`docs-${g.key}`}>
+              <h2 id={`docs-${g.key}`} class="docs__title label reveal"><span class="mark"></span> {g.label}</h2>
+              <ul class="docs__list" role="list">
+                {g.items.map((d, i) => (
+                  <li class="card doc reveal" style={`--i:${i + 1}`}>
+                    <span class="doc__icon"><Icon name="file-text" size={22} strokeWidth={1.5} /></span>
+                    <div class="doc__body">
+                      <p class="doc__title">{d.title}</p>
+                      <p class="doc__meta label">
+                        {d.format ?? 'PDF'}
+                        {'date' in d && d.date && <> · {formatMonthCap(d.date)}</>}
+                        {'size' in d && d.size && <> · {d.size}</>}
+                      </p>
+                      {d.description && <p class="doc__desc">{d.description}</p>}
+                    </div>
+                    <div class="doc__actions">
+                      {isPdf(d.href) && (
+                        <a href={d.href} class="btn btn--secondary btn--sm" target="_blank" rel="noopener"><Icon name="eye" size={14} /> Ouvrir</a>
+                      )}
+                      <a href={d.href} class="btn btn--sm" download><Icon name="download" size={14} /> Télécharger</a>
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </section>
+          ))}
+        </div>
+      ) : (
+        <EmptyState
+          title="Aucun document publié pour le moment"
+          text="Rapports de stage, dossiers techniques, schémas et CV seront ajoutés ici après vérification (CONTENT-SAFETY.md). Les fichiers se placent dans public/documents/."
+          file="src/data/documents.ts"
+        />
+      )}
+
+      <aside class="docs__policy reveal">
+        <p class="label"><Icon name="shield" size={13} /> Politique de publication</p>
+        <p>
+          Aucun document ne contient d’adresse personnelle, de numéro de téléphone, d’identifiants, de mots de passe, de clés ou de données internes d’entreprise.
+          Les captures d’écran sont anonymisées et les adresses IP remplacées par des plages d’exemple.
+        </p>
+      </aside>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .docs { display: flex; flex-direction: column; gap: var(--space-7); }
+  .docs__title { display: flex; align-items: center; gap: 0.6rem; margin-bottom: var(--space-4); font-family: var(--font-mono); font-size: var(--text-xs); }
+  .docs__list { display: grid; gap: var(--space-4); }
+  .doc { display: grid; grid-template-columns: auto 1fr; gap: 0.75rem 1rem; padding: 1.1rem 1.25rem; align-items: center; }
+  @media (min-width: 720px) { .doc { grid-template-columns: auto 1fr auto; } }
+  .doc__icon { color: var(--accent); display: inline-flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper-2); }
+  .doc__title { font-weight: 600; }
+  .doc__meta { margin-top: 0.15rem; }
+  .doc__desc { margin-top: 0.35rem; font-size: var(--text-sm); color: var(--ink-2); }
+  .doc__actions { display: flex; gap: 0.5rem; flex-wrap: wrap; grid-column: 1 / -1; }
+  @media (min-width: 720px) { .doc__actions { grid-column: auto; } }
+
+  .docs__policy { margin-top: var(--space-8); max-width: 64ch; font-size: var(--text-sm); color: var(--ink-2); border-left: 1px solid var(--line-strong); padding-left: 1.25rem; }
+  .docs__policy .label { display: inline-flex; align-items: center; gap: 0.4rem; margin-bottom: 0.5rem; }
+</style>

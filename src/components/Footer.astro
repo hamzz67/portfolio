@@ -1,0 +1,101 @@
+---
+import Icon from '@/components/Icon.astro';
+import Logo from '@/components/Logo.astro';
+import { profile, isPlaceholder } from '@/data/profile';
+
+const year = new Date().getFullYear();
+const links = [
+  { label: 'GitHub', href: profile.links.github, icon: 'github' as const },
+  { label: 'LinkedIn', href: profile.links.linkedin, icon: 'linkedin' as const },
+  { label: 'E-mail', href: profile.links.email ? `mailto:${profile.links.email}` : undefined, icon: 'mail' as const, raw: profile.links.email },
+].filter((l) => !isPlaceholder(l.raw ?? l.href));
+---
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer__grid">
+      <div class="footer__brand">
+        <Logo size={44} />
+        <div>
+          <p class="footer__name">{profile.name}</p>
+          <p class="footer__sub">{profile.role}<br />{profile.school}, {profile.city}</p>
+        </div>
+      </div>
+
+      <nav class="footer__nav" aria-label="Plan du site">
+        <p class="label">Navigation</p>
+        <ul role="list">
+          <li><a href="/travaux">Travaux</a></li>
+          <li><a href="/parcours">Parcours</a></li>
+          <li><a href="/competences">Compétences</a></li>
+          <li><a href="/galerie">Galerie</a></li>
+          <li><a href="/documents">Documents</a></li>
+          <li><a href="/presentation">Mode présentation</a></li>
+        </ul>
+      </nav>
+
+      <div class="footer__contact">
+        <p class="label">Contact</p>
+        {links.length > 0 ? (
+          <ul role="list">
+            {links.map((l) => (
+              <li>
+                <a href={l.href} rel={l.href?.startsWith('http') ? 'me noopener' : undefined} target={l.href?.startsWith('http') ? '_blank' : undefined}>
+                  <Icon name={l.icon} size={16} /> {l.label}
+                </a>
+              </li>
+            ))}
+          </ul>
+        ) : (
+          <p class="footer__todo"><span class="todo">TODO</span> liens de contact à renseigner dans <code>src/data/profile.ts</code></p>
+        )}
+      </div>
+    </div>
+
+    <div class="footer__bottom">
+      <p class="label">© {year} {profile.name} · Portfolio BTS SIO SISR</p>
+      <p class="label footer__colophon">
+        Site statique · <a href="/.well-known/security.txt" title="RFC 9116">security.txt</a> · <a href="/humans.txt">humans.txt</a>
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    position: relative;
+    z-index: 1;
+    margin-top: var(--section);
+    border-top: 1px solid var(--line-strong);
+    background: var(--paper-2);
+    padding-block: var(--space-8) var(--space-6);
+  }
+  .footer__grid {
+    display: grid;
+    gap: var(--space-7);
+    grid-template-columns: 1fr;
+  }
+  @media (min-width: 720px) { .footer__grid { grid-template-columns: 1.4fr 1fr 1fr; } }
+
+  .footer__brand { display: flex; gap: var(--space-4); align-items: flex-start; }
+  .footer__name { font-family: var(--font-display); font-size: var(--text-xl); line-height: 1.1; }
+  .footer__sub { margin-top: var(--space-2); color: var(--ink-3); font-size: var(--text-sm); line-height: 1.5; }
+
+  .footer .label { margin-bottom: var(--space-3); display: block; }
+  .footer ul { display: flex; flex-direction: column; gap: 0.5rem; }
+  .footer ul a { display: inline-flex; align-items: center; gap: 0.5rem; color: var(--ink-2); font-size: var(--text-sm); transition: color var(--dur-fast); }
+  .footer ul a:hover { color: var(--accent); }
+  .footer__todo { font-size: var(--text-sm); color: var(--ink-3); }
+
+  .footer__bottom {
+    margin-top: var(--space-7);
+    padding-top: var(--space-4);
+    border-top: 1px solid var(--line);
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    gap: var(--space-2);
+  }
+  .footer__bottom .label { margin: 0; text-transform: none; letter-spacing: 0.02em; }
+  .footer__colophon a:hover { color: var(--accent); }
+</style>

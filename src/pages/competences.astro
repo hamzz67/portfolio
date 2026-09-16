@@ -1,0 +1,151 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import SectionHead from '@/components/SectionHead.astro';
+import { skillDomains } from '@/data/skills';
+import { BTS_BLOCS, blocKeys } from '@/data/taxonomy';
+import { getProjects, getProjectsForSkill } from '@/lib/projects';
+import { slugify } from '@/lib/format';
+
+const projects = await getProjects();
+
+const domains = await Promise.all(
+  skillDomains.map(async (domain) => ({
+    ...domain,
+    skills: await Promise.all(
+      domain.skills.map(async (skill) => ({
+        ...skill,
+        projects: skill.placeholder ? [] : await getProjectsForSkill(skill.name),
+      })),
+    ),
+  })),
+);
+
+const blocs = blocKeys.map((b) => ({
+  id: b,
+  label: BTS_BLOCS[b].label,
+  projects: projects.filter((p) => p.data.bts.includes(b)),
+}));
+
+const totalSkills = domains.reduce((n, d) => n + d.skills.filter((s) => !s.placeholder).length, 0);
+---
+
+<Base
+  title="Compétences — réseaux, systèmes, cybersécurité, développement"
+  description="Compétences confirmées en BTS SIO SISR, organisées par domaine et reliées aux travaux qui les mobilisent : Cisco, VLAN, routage, Linux, Windows, virtualisation, sécurité."
+>
+  <section class="section section--tight">
+    <div class="container">
+      <SectionHead level="h1" index="03" label="Compétences" titleHtml="Des compétences <span class='em'>reliées</span> à des travaux concrets">
+        {totalSkills} compétences confirmées. Aucun pourcentage : chaque ligne renvoie vers les fiches qui la mettent en œuvre.
+      </SectionHead>
+
+      <nav class="skills-nav reveal" aria-label="Domaines">
+        <ul class="chips" role="list">
+          {domains.map((d) => <li><a class="chip" href={`#${d.id}`}><Icon name={d.icon as any} size={12} /> {d.label}</a></li>)}
+          <li><a class="chip" href="#referentiel"><Icon name="book-open" size={12} /> Référentiel BTS</a></li>
+        </ul>
+      </nav>
+
+      <div class="domains">
+        {domains.map((domain, di) => (
+          <section class="domain reveal-group" id={domain.id} aria-labelledby={`${domain.id}-title`}>
+            <header class="domain__head reveal">
+              <span class="domain__icon"><Icon name={domain.icon as any} size={24} strokeWidth={1.5} /></span>
+              <div>
+                <p class="label">{String(di + 1).padStart(2, '0')} · Domaine</p>
+                <h2 id={`${domain.id}-title`} class="domain__title">{domain.label}</h2>
+                <p class="domain__desc">{domain.description}</p>
+              </div>
+            </header>
+            <ul class="skills" role="list">
+              {domain.skills.map((skill, si) => (
+                <li class:list={['skill reveal', { 'skill--placeholder': skill.placeholder }]} style={`--i:${si + 1}`}>
+                  <div class="skill__main">
+                    {skill.placeholder ? (
+                      <span class="skill__name skill__name--todo"><span class="todo">TODO</span> {skill.name.replace(/^TODO\s*[—-]?\s*/i, '')}</span>
+                    ) : (
+                      <span class="skill__name">{skill.name}</span>
+                    )}
+                    {skill.note && <span class="skill__note">{skill.note}</span>}
+                  </div>
+                  <div class="skill__rel">
+                    {skill.projects.length > 0 ? (
+                      <>
+                        <span class="label">{skill.projects.length} fiche{skill.projects.length > 1 ? 's' : ''}</span>
+                        <ul class="chips" role="list">
+                          {skill.projects.slice(0, 3).map((p) => (
+                            <li><a class="chip" href={`/travaux/${p.id}`}>{p.data.title.length > 38 ? p.data.title.slice(0, 36) + '…' : p.data.title}</a></li>
+                          ))}
+                          {skill.projects.length > 3 && (
+                            <li><a class="chip chip--accent" href={`/travaux?tech=${slugify(skill.name)}`}>+{skill.projects.length - 3}</a></li>
+                          )}
+                        </ul>
+                      </>
+                    ) : (
+                      !skill.placeholder && <span class="label skill__none">Fiche à venir</span>
+                    )}
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </section>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <section class="section" id="referentiel" aria-labelledby="ref-title">
+    <div class="container">
+      <SectionHead index="03.1" label="Référentiel BTS SIO" titleHtml="Blocs de <span class='em'>compétences</span> du diplôme" id="ref-title">
+        Chaque fiche peut être rattachée à un ou plusieurs blocs du référentiel, pour faciliter la lecture par le jury.
+      </SectionHead>
+      <ul class="blocs reveal-group" role="list">
+        {blocs.map((b, i) => (
+          <li class="card bloc reveal" style={`--i:${i}`}>
+            <span class="label label--accent">{b.id}</span>
+            <h3 class="bloc__title">{b.label}</h3>
+            {b.projects.length > 0 ? (
+              <ul class="bloc__list" role="list">
+                {b.projects.map((p) => <li><a href={`/travaux/${p.id}`}>{p.data.title} <Icon name="arrow-up-right" size={12} /></a></li>)}
+              </ul>
+            ) : (
+              <p class="label bloc__none">Aucune fiche rattachée pour le moment</p>
+            )}
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .skills-nav { margin-bottom: var(--space-7); }
+  .domains { display: flex; flex-direction: column; gap: var(--space-7); }
+  .domain { scroll-margin-top: calc(var(--header-h) + 1rem); display: grid; gap: var(--space-5); }
+  @media (min-width: 900px) { .domain { grid-template-columns: minmax(0, 4fr) minmax(0, 8fr); gap: var(--space-7); } }
+  .domain__head { display: flex; gap: 1rem; align-items: flex-start; }
+  .domain__icon { flex: none; display: inline-flex; align-items: center; justify-content: center; width: 3rem; height: 3rem; border: 1px solid var(--line); border-radius: var(--radius); background: var(--paper-elev); color: var(--accent); }
+  .domain__head .label { display: block; margin-bottom: 0.3rem; }
+  .domain__title { font-size: var(--text-xl); }
+  .domain__desc { margin-top: 0.4rem; font-size: var(--text-sm); color: var(--ink-2); max-width: 36ch; }
+
+  .skills { border-top: 1px solid var(--line-strong); }
+  .skill { display: grid; gap: 0.5rem 1.5rem; padding: 0.9rem 0; border-bottom: 1px solid var(--line); }
+  @media (min-width: 640px) { .skill { grid-template-columns: minmax(0, 5fr) minmax(0, 7fr); align-items: start; } }
+  .skill__main { display: flex; flex-direction: column; gap: 0.15rem; }
+  .skill__name { font-weight: 600; color: var(--ink); }
+  .skill__name--todo { font-weight: 400; color: var(--ink-3); font-size: var(--text-sm); }
+  .skill__note { font-size: var(--text-sm); color: var(--ink-3); }
+  .skill__rel { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem 0.75rem; }
+  .skill__none { color: var(--ink-4); }
+  .skill--placeholder { background: repeating-linear-gradient(-45deg, transparent 0 14px, var(--line-soft) 14px 15px); }
+
+  .blocs { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); }
+  .bloc { padding: 1.25rem; gap: 0.5rem; }
+  .bloc__title { font-size: var(--text-lg); }
+  .bloc__list { display: flex; flex-direction: column; gap: 0.35rem; margin-top: 0.5rem; font-size: var(--text-sm); }
+  .bloc__list a { display: inline-flex; align-items: center; gap: 0.3rem; color: var(--ink-2); }
+  .bloc__list a:hover { color: var(--accent); }
+  .bloc__none { margin-top: 0.5rem; color: var(--ink-4); text-transform: none; letter-spacing: 0.02em; }
+</style>

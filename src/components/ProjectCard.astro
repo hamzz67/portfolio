@@ -1,0 +1,157 @@
+---
+import { Image } from 'astro:assets';
+import Icon from '@/components/Icon.astro';
+import { CATEGORIES, KINDS, STATUSES, type Category, type Kind, type Status } from '@/data/taxonomy';
+import { getProjectRef, searchIndex, type Project } from '@/lib/projects';
+import { formatMonthCap, slugify } from '@/lib/format';
+
+interface Props {
+  project: Project;
+  /** Variante large (mise en avant). */
+  featured?: boolean;
+  /** Index affiché (01, 02…) pour les listes. */
+  index?: number;
+}
+const { project, featured = false, index } = Astro.props;
+const d = project.data;
+const ref = await getProjectRef(project);
+const kind = KINDS[d.kind as Kind];
+const category = CATEGORIES[d.category as Category];
+const status = STATUSES[d.status as Status];
+const allCategories = [d.category, ...d.categories];
+const techs = d.technologies.slice(0, featured ? 6 : 4);
+const more = d.technologies.length - techs.length;
+const href = `/travaux/${project.id}`;
+---
+
+<article
+  class:list={['card card--link pcard', { 'pcard--featured': featured }]}
+  data-kind={d.kind}
+  data-category={allCategories.join(' ')}
+  data-tech={d.technologies.map(slugify).join(' ')}
+  data-year={d.date.getFullYear()}
+  data-context={d.context ? slugify(d.context) : ''}
+  data-status={d.status}
+  data-search={searchIndex(project)}
+>
+  <a href={href} class="pcard__link" aria-label={`Ouvrir la fiche : ${d.title}`}></a>
+
+  <div class="pcard__media">
+    {d.cover ? (
+      <Image
+        src={d.cover}
+        alt={d.coverAlt ?? ''}
+        width={featured ? 1200 : 720}
+        widths={[480, 720, 1200]}
+        sizes={featured ? '(min-width: 1024px) 60vw, 100vw' : '(min-width: 1024px) 30vw, (min-width: 640px) 50vw, 100vw'}
+        loading="lazy"
+        decoding="async"
+        class="pcard__img"
+        transition:name={`cover-${project.id}`}
+      />
+    ) : (
+      <div class="pcard__plate" aria-hidden="true">
+        <Icon name={category.icon as any} size={featured ? 40 : 28} strokeWidth={1.25} />
+        <span class="pcard__plate-ref">{ref}</span>
+      </div>
+    )}
+    <span class="pcard__kind chip">{kind.short}</span>
+    {d.status !== 'termine' && <span class="pcard__status chip chip--signal">{status.label}</span>}
+  </div>
+
+  <div class="pcard__body">
+    <p class="pcard__meta label">
+      {index !== undefined && <span class="pcard__index">{String(index).padStart(2, '0')}</span>}
+      <span>{ref}</span>
+      <span aria-hidden="true">·</span>
+      <span>{category.label}</span>
+      <span aria-hidden="true">·</span>
+      <time datetime={d.date.toISOString().slice(0, 10)}>{formatMonthCap(d.date)}</time>
+    </p>
+    <h3 class="pcard__title" transition:name={`title-${project.id}`}>{d.title}</h3>
+    <p class="pcard__summary">{d.summary}</p>
+
+    {(techs.length > 0 || d.organization) && (
+      <div class="pcard__foot">
+        {techs.length > 0 ? (
+          <ul class="chips" role="list" aria-label="Technologies">
+            {techs.map((t) => <li class="chip">{t}</li>)}
+            {more > 0 && <li class="chip chip--placeholder">+{more}</li>}
+          </ul>
+        ) : (
+          <span class="chip chip--placeholder">Technologies à renseigner</span>
+        )}
+        {d.organization && <span class="pcard__org label">{d.organization}</span>}
+      </div>
+    )}
+    <span class="pcard__arrow" aria-hidden="true"><Icon name="arrow-up-right" size={18} /></span>
+  </div>
+</article>
+
+<style>
+  .pcard { overflow: hidden; height: 100%; }
+  .pcard__link { position: absolute; inset: 0; z-index: 2; }
+  .pcard__link:focus-visible { outline-offset: -2px; border-radius: var(--radius-lg); }
+
+  .pcard__media {
+    position: relative;
+    aspect-ratio: 16 / 10;
+    background: var(--paper-2);
+    border-bottom: 1px solid var(--line);
+    overflow: hidden;
+  }
+  .pcard__img { width: 100%; height: 100%; object-fit: cover; transition: transform 900ms var(--ease-out); }
+  .pcard:hover .pcard__img { transform: scale(1.04); }
+
+  /* Planche par défaut : motif de plan quadrillé + icône du domaine */
+  .pcard__plate {
+    position: absolute; inset: 0;
+    display: flex; align-items: center; justify-content: center;
+    color: var(--ink-3);
+    background-image:
+      linear-gradient(var(--line-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line-soft) 1px, transparent 1px);
+    background-size: 24px 24px;
+    background-position: center;
+    transition: color var(--dur);
+  }
+  .pcard:hover .pcard__plate { color: var(--accent); }
+  .pcard__plate::before {
+    content: '';
+    position: absolute;
+    inset: 12%;
+    border: 1px dashed var(--line);
+    border-radius: 2px;
+  }
+  .pcard__plate-ref {
+    position: absolute; right: 0.9rem; bottom: 0.7rem;
+    font-family: var(--font-mono); font-size: 0.625rem; letter-spacing: 0.08em; color: var(--ink-4);
+  }
+  .pcard__kind { position: absolute; top: 0.75rem; left: 0.75rem; }
+  .pcard__status { position: absolute; top: 0.75rem; right: 0.75rem; }
+
+  .pcard__body { display: flex; flex-direction: column; gap: 0.6rem; padding: 1.1rem 1.25rem 1.25rem; flex: 1; position: relative; }
+  .pcard__meta { display: flex; flex-wrap: wrap; gap: 0.5rem; align-items: center; }
+  .pcard__index { color: var(--accent); }
+  .pcard__title { font-size: var(--text-lg); padding-right: 2rem; transition: color var(--dur-fast); }
+  .pcard:hover .pcard__title { color: var(--accent); }
+  .pcard__summary { color: var(--ink-2); font-size: var(--text-sm); line-height: 1.55; }
+  .pcard__foot { margin-top: auto; padding-top: 0.75rem; display: flex; flex-direction: column; gap: 0.6rem; }
+  .pcard__org { text-transform: none; letter-spacing: 0.02em; }
+
+  .pcard__arrow {
+    position: absolute; top: 1.05rem; right: 1.1rem;
+    color: var(--ink-3);
+    transition: transform var(--dur) var(--ease-out), color var(--dur-fast);
+  }
+  .pcard:hover .pcard__arrow { transform: translate(2px, -2px); color: var(--accent); }
+
+  .pcard--featured { flex-direction: column; }
+  @media (min-width: 900px) {
+    .pcard--featured { flex-direction: row; }
+    .pcard--featured .pcard__media { flex: 0 0 56%; aspect-ratio: auto; min-height: 320px; border-bottom: 0; border-right: 1px solid var(--line); }
+    .pcard--featured .pcard__body { padding: 1.75rem 2rem; gap: 0.9rem; }
+    .pcard--featured .pcard__title { font-size: var(--text-xl); }
+    .pcard--featured .pcard__summary { font-size: var(--text-base); }
+  }
+</style>
