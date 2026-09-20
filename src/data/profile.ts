@@ -52,9 +52,9 @@ export const profile = {
    * Laisser `undefined` pour masquer un lien.
    */
   links: {
-    email: 'TODO@exemple.fr' as string | undefined,
-    github: 'TODO' as string | undefined, // ex. 'https://github.com/votre-identifiant'
-    linkedin: 'TODO' as string | undefined, // ex. 'https://www.linkedin.com/in/votre-identifiant'
+    email: 'hamza.jallabi20@gmail.com' as string | undefined,
+    github: 'https://github.com/hamzz67' as string | undefined,
+    linkedin: 'https://fr.linkedin.com/in/hamza-jallabi-b17980317' as string | undefined,
     /** Chemin du CV public dans /public/documents (ou undefined pour masquer). */
     cv: undefined as string | undefined, // ex. '/documents/cv-hamza-jallabi.pdf'
   },
