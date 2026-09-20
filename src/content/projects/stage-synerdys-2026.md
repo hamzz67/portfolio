@@ -38,9 +38,42 @@ status: termine
 featured: true
 order: 1
 publicSafe: true
-# cover: ./stage-synerdys-2026/cover.png
-# coverAlt: "Tableau de bord de l’application (données fictives)"
-images: []
+cover: ./stage-synerdys-2026/capture-01-tableau-de-bord.jpg
+coverAlt: "Tableau de bord de l’application : indicateurs, chiffre d’affaires, dossiers par statut, alertes (données de démonstration)"
+images:
+  - src: ./stage-synerdys-2026/capture-02-signature-devis.jpg
+    alt: "Page publique de signature en ligne d’un devis, accessible par lien unique"
+    caption: "Signature en ligne du devis, sans création de compte (coordonnées masquées)"
+  - src: ./stage-synerdys-2026/capture-06-devis-pdf.jpg
+    alt: "Première page du devis PDF généré, avec QR code de signature"
+    caption: "Devis PDF généré par l’application, QR code vers la page de signature (coordonnées masquées)"
+  - src: ./stage-synerdys-2026/capture-07-kanban.jpg
+    alt: "Vue Kanban des dossiers d’audit par statut : ouvert, en cours, clôturé"
+    caption: "Kanban des dossiers, changement de statut par glisser-déposer (données de démonstration)"
+  - src: ./stage-synerdys-2026/capture-08-pipeline-crm.jpg
+    alt: "Pipeline CRM des prospects, de « à contacter » à « converti » ou « perdu »"
+    caption: "Pipeline commercial : les prospects issus du site vitrine arrivent ici automatiquement (données de démonstration)"
+  - src: ./stage-synerdys-2026/capture-09-calendrier.jpg
+    alt: "Calendrier mensuel des visites, échéances de dossiers et factures à relancer"
+    caption: "Calendrier des visites terrain et des échéances"
+  - src: ./stage-synerdys-2026/capture-05-fiche-dossier.jpg
+    alt: "Fiche détaillée d’un dossier d’audit : informations, client, visites, temps passé, documents, messagerie"
+    caption: "Fiche d’un dossier d’audit (coordonnées du client masquées)"
+  - src: ./stage-synerdys-2026/capture-11-liste-devis.jpg
+    alt: "Liste des devis avec filtres par statut : brouillon, envoyé, signé, payé, refusé"
+    caption: "Liste des devis et de leurs statuts (données de démonstration)"
+  - src: ./stage-synerdys-2026/capture-12-rentabilite.jpg
+    alt: "Rentabilité par dossier : heures, chiffre d’affaires facturé, coût estimé, marge"
+    caption: "Rentabilité par dossier, calculée à partir du temps saisi (données de démonstration)"
+  - src: ./stage-synerdys-2026/capture-13-statistiques.jpg
+    alt: "Statistiques globales : devis créés et signés, taux de conversion, chiffre d’affaires mensuel, non-conformités par type"
+    caption: "Statistiques de l’activité (données de démonstration, e-mails masqués)"
+  - src: ./stage-synerdys-2026/capture-03-api-documentation.jpg
+    alt: "Documentation interactive de l’API REST (Swagger UI) avec la clé API masquée"
+    caption: "API REST documentée avec Swagger UI, utilisée par le site vitrine (clé masquée)"
+  - src: ./stage-synerdys-2026/capture-04-connexion.jpg
+    alt: "Page de connexion de l’application"
+    caption: "Page de connexion ; une deuxième vérification par e-mail est demandée à l’administrateur"
 documents: []
 links: {}
 ---
@@ -125,7 +158,7 @@ En chiffres : environ 8 400 lignes de Python, 150 routes HTTP, 72 templates, 27 
 
 ## Captures d’écran
 
-> **À venir** — captures du tableau de bord, du circuit de signature et de l’outil de vérification des échanges, avec des données fictives. Elles seront ajoutées après anonymisation.
+Les captures sont regroupées en bas de page. Toutes proviennent de l’environnement de développement avec un **jeu de données de démonstration** ; les coordonnées de l’entreprise, les e-mails, téléphones, numéros d’identification et la clé d’API ont été masqués avant publication.
 
 ## Sécurisation
 
