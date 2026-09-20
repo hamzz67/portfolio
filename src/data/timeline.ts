@@ -38,12 +38,12 @@ export const timeline: TimelineItem[] = [
     description: 'Travaux pratiques réseau et systèmes, préparation du stage de première année.',
   },
   {
-    date: 'Juin 2026',
+    date: 'Juin – juil. 2026',
     iso: '2026-06',
-    title: 'Stage chez Enerdys',
+    title: 'Stage chez Synerdys',
     place: 'Entzheim',
-    description: 'Stage de première année : développement d’un SaaS / outil web.',
-    href: '/travaux/stage-enerdys-2026',
+    description: 'Stage de première année (5 semaines) : création et sécurisation d’une application web de gestion pour un cabinet de diagnostics immobiliers.',
+    href: '/travaux/stage-synerdys-2026',
     highlight: true,
   },
   {

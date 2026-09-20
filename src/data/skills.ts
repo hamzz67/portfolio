@@ -52,6 +52,8 @@ export const skillDomains: SkillDomain[] = [
       { name: 'Linux', note: 'Administration, ligne de commande' },
       { name: 'Windows', note: 'Postes et services' },
       { name: 'Virtualisation', note: 'Machines virtuelles, laboratoires' },
+      { name: 'Ubuntu Server', note: 'Préparation d’un déploiement web (Nginx, Gunicorn, HTTPS)' },
+      { name: 'Sauvegardes et tâches planifiées', note: 'Rétention, relances et alertes automatiques' },
     ],
   },
   {
@@ -63,6 +65,7 @@ export const skillDomains: SkillDomain[] = [
       { name: 'Sécurité réseau', note: 'Notions : segmentation, filtrage, durcissement' },
       { name: 'Sécurité système', note: 'Notions : comptes, droits, mises à jour' },
       { name: 'Bonnes pratiques', note: 'Mots de passe, sauvegardes, moindre privilège' },
+      { name: 'Sécurisation d’une application', note: 'Authentification, rôles, CSRF/XSS, en-têtes, journalisation' },
     ],
   },
   {
@@ -71,7 +74,14 @@ export const skillDomains: SkillDomain[] = [
     icon: 'code',
     description: 'Conception d’outils et d’applications web pour automatiser et simplifier.',
     skills: [
-      { name: 'TODO — technologies de développement à confirmer', placeholder: true },
+      { name: 'Python', note: 'Bases acquises en stage' },
+      { name: 'Flask', note: 'Application web, routes, sessions' },
+      { name: 'SQLAlchemy', note: 'Modèle de données, ORM' },
+      { name: 'SQLite', note: 'Base de développement' },
+      { name: 'PostgreSQL', note: 'Base cible en production' },
+      { name: 'Bootstrap 5', note: 'Interfaces responsives' },
+      { name: 'JavaScript', note: 'Interactions, graphiques (Chart.js)' },
+      { name: 'pytest', note: 'Tests automatisés' },
     ],
   },
   {
@@ -82,7 +92,9 @@ export const skillDomains: SkillDomain[] = [
     skills: [
       { name: 'Git', note: 'Versionnement' },
       { name: 'GitHub', note: 'Dépôts, collaboration' },
+      { name: 'GitHub Actions', note: 'Tests lancés à chaque modification' },
       { name: 'VS Code' },
+      { name: 'Claude Code', note: 'Assistant IA : accélérer, puis relire et tester' },
     ],
   },
 ];

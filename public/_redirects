@@ -1,2 +1,3 @@
 # Redirections — lues automatiquement par Cloudflare Pages (et Netlify).
-/stage    /travaux/stage-enerdys-2026   301
+/stage                         /travaux/stage-synerdys-2026   301
+/travaux/stage-enerdys-2026    /travaux/stage-synerdys-2026   301

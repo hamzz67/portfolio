@@ -29,7 +29,7 @@ Prérequis : **Node.js 22.12 ou plus récent** (`node -v` pour vérifier).
 src/
 ├── content/projects/     ← FICHES DE TRAVAUX (TP, stage, projets) — 1 fichier .md = 1 fiche
 │   ├── _TEMPLATE.md      ← modèle à copier
-│   └── stage-enerdys-2026.md
+│   └── stage-synerdys-2026.md
 ├── data/                 ← DONNÉES ÉDITABLES (aucun code à comprendre)
 │   ├── profile.ts        ← nom, accroche, présentation, liens de contact
 │   ├── timeline.ts       ← parcours (timeline)

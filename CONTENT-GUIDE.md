@@ -63,9 +63,9 @@ links:
 
 ## 3. Ajouter le stage (ou un deuxième stage)
 
-La fiche `stage-enerdys-2026.md` existe déjà avec tous les blocs attendus par le jury et des `TODO` à remplacer. Pour un autre stage : copier `_TEMPLATE.md`, mettre `kind: stage` et reprendre les mêmes titres de section que la fiche existante (Contexte, Problématique, Objectifs, Rôle personnel, Technologies, Architecture, Fonctionnalités, Captures d'écran, Difficultés, Solutions, Compétences mobilisées, Résultat, Bilan).
+La fiche `stage-synerdys-2026.md` existe déjà avec tous les blocs attendus par le jury et des `TODO` à remplacer. Pour un autre stage : copier `_TEMPLATE.md`, mettre `kind: stage` et reprendre les mêmes titres de section que la fiche existante (Contexte, Problématique, Objectifs, Rôle personnel, Technologies, Architecture, Fonctionnalités, Captures d'écran, Difficultés, Solutions, Compétences mobilisées, Résultat, Bilan).
 
-L'adresse courte `/stage` pointe vers `stage-enerdys-2026` (modifiable dans `astro.config.mjs` → `redirects` et `public/_redirects`).
+L'adresse courte `/stage` pointe vers `stage-synerdys-2026` (modifiable dans `astro.config.mjs` → `redirects` et `public/_redirects`).
 
 ---
 
@@ -111,7 +111,7 @@ Catégories : `capture`, `schema`, `architecture`, `interface`, `resultat`, `con
 ## 5. Ajouter un PDF (rapport, compte rendu, CV)
 
 1. Vérifier le document avec CONTENT-SAFETY.md (produire une **version publique** si nécessaire).
-2. Déposer le fichier dans `public/documents/`, avec un nom simple : `rapport-stage-enerdys-2026-public.pdf`.
+2. Déposer le fichier dans `public/documents/`, avec un nom simple : `rapport-stage-synerdys-2026-public.pdf`.
 3. Le référencer :
 
 **Joint à une fiche** (en-tête de la fiche) :
@@ -127,8 +127,8 @@ documents:
 
 ```ts
 {
-  title: 'Rapport de stage — Enerdys (version publique)',
-  href: '/documents/rapport-stage-enerdys-2026-public.pdf',
+  title: 'Rapport de stage — Synerdys (version publique)',
+  href: '/documents/rapport-stage-synerdys-2026-public.pdf',
   category: 'rapport',        // rapport | dossier | schema | cv | technique | autre
   description: 'Version anonymisée du rapport de stage de première année.',
   date: '2026-07',
@@ -186,10 +186,10 @@ Dans `src/data/timeline.ts`, chaque étape est un objet :
 {
   date: 'Juin 2026',            // texte affiché
   iso: '2026-06',               // AAAA ou AAAA-MM (sert au tri et au statut automatique)
-  title: 'Stage chez Enerdys',
+  title: 'Stage chez Synerdys',
   place: 'Entzheim',
   description: 'Stage de première année : développement d’un SaaS / outil web.',
-  href: '/travaux/stage-enerdys-2026',   // lien optionnel
+  href: '/travaux/stage-synerdys-2026',   // lien optionnel
   highlight: true,                       // mise en avant optionnelle
 },
 ```

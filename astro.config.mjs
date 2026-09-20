@@ -19,7 +19,8 @@ export default defineConfig({
     format: 'file', // /travaux.html plutôt que /travaux/index.html → URL propres sur Cloudflare Pages et GitHub Pages
   },
   redirects: {
-    '/stage': '/travaux/stage-enerdys-2026',
+    '/stage': '/travaux/stage-synerdys-2026',
+    '/travaux/stage-enerdys-2026': '/travaux/stage-synerdys-2026', // ancien nom de l'entreprise
   },
   prefetch: {
     prefetchAll: true,

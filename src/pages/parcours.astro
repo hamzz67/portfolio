@@ -14,7 +14,7 @@ const statusLabel = { obtenue: 'obtenue', 'en-cours': 'en cours', prevue: 'prév
 
 <Base
   title="Parcours — formation, stage et certifications"
-  description={`Parcours de ${profile.name} : BTS SIO SISR au ${profile.school} (${profile.city}), 2025-2027, stage chez Enerdys, certifications.`}
+  description={`Parcours de ${profile.name} : BTS SIO SISR au ${profile.school} (${profile.city}), 2025-2027, stage chez Synerdys, certifications.`}
 >
   <section class="section">
     <div class="container cols">
@@ -36,7 +36,7 @@ const statusLabel = { obtenue: 'obtenue', 'en-cours': 'en cours', prevue: 'prév
             <div>
               <dt>Stage de première année</dt>
               <dd>
-                <a class="link" href={`/travaux/${stage.id}`}>{stage.data.organization ?? 'Enerdys — Entzheim'}</a>
+                <a class="link" href={`/travaux/${stage.id}`}>{stage.data.organization ?? 'Synerdys — Entzheim'}</a>
                 <br /><span class="meta">{formatMonthCap(stage.data.date)} · {stage.data.summary}</span>
               </dd>
             </div>

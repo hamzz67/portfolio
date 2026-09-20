@@ -137,7 +137,7 @@ Tout est automatique, mais vérifier une fois :
 
 ## Étape 7 — Vérifier le site en ligne
 
-- [ ] Toutes les pages s'ouvrent : `/`, `/travaux`, `/travaux/stage-enerdys-2026`, `/stage` (redirection), `/parcours`, `/competences`, `/galerie`, `/documents`, `/presentation`, une URL inexistante (page 404 personnalisée).
+- [ ] Toutes les pages s'ouvrent : `/`, `/travaux`, `/travaux/stage-synerdys-2026`, `/stage` (redirection), `/parcours`, `/competences`, `/galerie`, `/documents`, `/presentation`, une URL inexistante (page 404 personnalisée).
 - [ ] `https://votre-domaine/sitemap-index.xml` et `/robots.txt` mentionnent le bon domaine.
 - [ ] Sur mobile (vrai téléphone) : navigation, menu, cartes, visionneuse.
 - [ ] Partage du lien sur LinkedIn / Discord / WhatsApp : l'aperçu montre l'image Open Graph (`og-default.png`).

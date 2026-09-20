@@ -31,8 +31,8 @@ export interface PublicDocument {
 export const documents: PublicDocument[] = [
   // Exemple (à supprimer / remplacer) :
   // {
-  //   title: 'Rapport de stage — Enerdys (version publique)',
-  //   href: '/documents/rapport-stage-enerdys-2026-public.pdf',
+  //   title: 'Rapport de stage — Synerdys (version publique)',
+  //   href: '/documents/rapport-stage-synerdys-2026-public.pdf',
   //   category: 'rapport',
   //   description: 'Version anonymisée du rapport de stage de première année.',
   //   date: '2026-07',
