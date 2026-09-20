@@ -21,7 +21,9 @@ interface Props {
 const { title, description, image = '/og-default.png', type = 'website', noindex = false, jsonLd } = Astro.props;
 
 const site = Astro.site ?? new URL('https://example.com');
-const canonical = new URL(Astro.url.pathname, site);
+// build.format = 'file' : le chemin contient « .html » au build, on le retire des URL publiques.
+const cleanPath = Astro.url.pathname.replace(/\/index\.html$/, '/').replace(/\.html$/, '');
+const canonical = new URL(cleanPath, site);
 const ogImage = new URL(image, site);
 const fullTitle = title.includes(profile.name) ? title : `${title} — ${profile.name}`;
 
