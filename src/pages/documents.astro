@@ -35,7 +35,7 @@ const isPdf = (href: string) => href.toLowerCase().endsWith('.pdf');
   <section class="section">
     <div class="container cols">
       <div>
-        <div class="head">
+        <div class="head" data-index="Documents">
           <h1>Documents</h1>
           <p>Rapports, dossiers techniques, schémas et CV. Chaque document publié ici est une version « public-safe » : anonymisée, sans identifiant ni donnée interne.</p>
         </div>
@@ -47,7 +47,7 @@ const isPdf = (href: string) => href.toLowerCase().endsWith('.pdf');
                 <h2 id={`docs-${g.key}`} class="docs__title">{g.label}</h2>
                 <ul class="rows" role="list">
                   {g.items.map((d) => (
-                    <li class="doc row">
+                    <li class="doc row" data-reveal>
                       <div>
                         <p class="row-title">{d.title}</p>
                         <p class="meta">
@@ -76,7 +76,7 @@ const isPdf = (href: string) => href.toLowerCase().endsWith('.pdf');
         )}
       </div>
 
-      <aside class="policy meta">
+      <aside class="policy meta" data-reveal>
         <p class="kicker">Politique de publication</p>
         <p>Aucun document ne contient d’adresse personnelle, de numéro de téléphone, d’identifiants, de mots de passe, de clés ou de données internes d’entreprise. Les captures d’écran sont anonymisées et les adresses IP remplacées par des plages d’exemple.</p>
       </aside>

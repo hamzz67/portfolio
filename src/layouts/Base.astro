@@ -25,6 +25,11 @@ const canonical = new URL(Astro.url.pathname, site);
 const ogImage = new URL(image, site);
 const fullTitle = title.includes(profile.name) ? title : `${title} — ${profile.name}`;
 
+/** Transition entre pages : le contenu sort vers le haut, le nouveau monte en fondu. */
+const out = { name: 'vt-out', duration: '180ms', easing: 'cubic-bezier(0.65, 0, 0.35, 1)', fillMode: 'both' } as const;
+const inn = { name: 'vt-in', duration: '460ms', easing: 'cubic-bezier(0.22, 1, 0.36, 1)', fillMode: 'both' } as const;
+const mainTransition = { forwards: { old: out, new: inn }, backwards: { old: out, new: inn } };
+
 const personLd = {
   '@context': 'https://schema.org',
   '@type': 'Person',
@@ -77,6 +82,7 @@ const personLd = {
     {/* Thème : appliqué avant le premier rendu pour éviter tout flash. */}
     <script is:inline>
       (function () {
+        document.documentElement.classList.add('js');
         try {
           var t = localStorage.getItem('theme');
           if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
@@ -89,7 +95,7 @@ const personLd = {
   <body>
     <a class="skip-link" href="#contenu">Aller au contenu</a>
     <Header />
-    <main id="contenu" tabindex="-1">
+    <main id="contenu" tabindex="-1" transition:name="main" transition:animate={mainTransition}>
       <slot />
     </main>
     <Footer />

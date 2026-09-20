@@ -26,7 +26,7 @@ const totalSkills = domains.reduce((n, d) => n + d.skills.filter((s) => !s.place
 >
   <section class="section">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="01 — Par domaine">
         <h1>Compétences</h1>
         <p>{totalSkills} compétences confirmées, par domaine. Pas de pourcentages : chaque ligne renvoie vers les fiches qui la mettent en œuvre.</p>
       </div>
@@ -39,13 +39,13 @@ const totalSkills = domains.reduce((n, d) => n + d.skills.filter((s) => !s.place
       <div class="domains">
         {domains.map((domain) => (
           <section class="domain cols" id={domain.id} aria-labelledby={`${domain.id}-title`}>
-            <div class="domain__intro">
+            <div class="domain__intro" data-reveal>
               <h2 id={`${domain.id}-title`}>{domain.label}</h2>
               <p class="meta">{domain.description}</p>
             </div>
             <ul class="rows" role="list">
               {domain.skills.map((skill) => (
-                <li class="skill row">
+                <li class="skill row" data-reveal>
                   <div>
                     {skill.placeholder ? (
                       <span class="meta"><span class="todo">TODO</span> {skill.name.replace(/^TODO\s*[—-]?\s*/i, '')}</span>
@@ -80,13 +80,13 @@ const totalSkills = domains.reduce((n, d) => n + d.skills.filter((s) => !s.place
 
   <section class="section" id="referentiel" aria-labelledby="ref-title">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="02 — Référentiel BTS">
         <h2 id="ref-title">Blocs de compétences du BTS SIO</h2>
         <p>Chaque fiche peut être rattachée à un ou plusieurs blocs du référentiel, pour faciliter la lecture par le jury.</p>
       </div>
       <dl class="blocs">
         {blocs.map((b) => (
-          <div class="bloc">
+          <div class="bloc" data-reveal>
             <dt><span class="mono bloc__id">{b.id}</span> {b.label}</dt>
             <dd class="meta">
               {b.projects.length > 0

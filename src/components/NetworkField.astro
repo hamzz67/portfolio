@@ -1,0 +1,267 @@
+---
+/**
+ * Topologie réseau animée (canvas) : commutateurs, hôtes, liens, paquets en transit
+ * et « pings » à l'arrivée. Décor de la hero — purement visuel (aria-hidden).
+ * Réagit au pointeur (parallaxe légère) et au thème. Statique si l'utilisateur
+ * préfère réduire les animations.
+ */
+interface Props {
+  class?: string;
+  /** Densité : nombre de nœuds sur grand écran. */
+  nodes?: number;
+}
+const { class: className, nodes = 28 } = Astro.props;
+---
+
+<div class:list={['netfield', className]} data-netfield data-nodes={nodes} aria-hidden="true">
+  <canvas></canvas>
+</div>
+
+<style>
+  .netfield { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  .netfield canvas { width: 100%; height: 100%; }
+</style>
+
+<script>
+  type Node = {
+    x: number; y: number; bx: number; by: number;
+    depth: number; hub: boolean; phase: number; label?: string;
+    ping: number; // 0 → pas d'anneau, sinon progression 0..1
+  };
+  type Edge = { a: number; b: number; dashed: boolean; len: number };
+  type Packet = { edge: number; t: number; speed: number; dir: 1 | -1 };
+
+  const LABELS = ['sw-core-01', 'fw-edge', 'srv-web', 'srv-ad', 'vlan 20', 'vlan 30', '10.0.10.0/24', 'nas-01', 'ap-wifi', 'r-wan', 'srv-dns', 'pc-tp-07'];
+
+  function rand(a: number, b: number) { return a + Math.random() * (b - a); }
+
+  class Field {
+    el: HTMLElement; canvas: HTMLCanvasElement; ctx: CanvasRenderingContext2D;
+    w = 0; h = 0; dpr = 1;
+    nodes: Node[] = []; edges: Edge[] = []; packets: Packet[] = [];
+    mx = 0; my = 0; tx = 0; ty = 0; // parallaxe : cible et valeur lissée
+    raf = 0; last = 0; running = false; visible = true;
+    colors = { ink: '#000', accent: '#0f6b4f', warn: '#c2571f', line: '#000' };
+    reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    ro: ResizeObserver; io: IntersectionObserver; mo: MutationObserver;
+    onMove: (e: PointerEvent) => void; onLeave: () => void; onVis: () => void;
+
+    constructor(el: HTMLElement) {
+      this.el = el;
+      this.canvas = el.querySelector('canvas')!;
+      this.ctx = this.canvas.getContext('2d')!;
+      this.readColors();
+      this.resize();
+      this.build(Number(el.dataset.nodes) || 28);
+
+      this.ro = new ResizeObserver(() => { this.resize(); this.build(Number(el.dataset.nodes) || 28); this.drawOnce(); });
+      this.ro.observe(el);
+      this.io = new IntersectionObserver(([e]) => { this.visible = e.isIntersecting; this.visible ? this.start() : this.stop(); });
+      this.io.observe(el);
+      this.mo = new MutationObserver(() => { this.readColors(); this.drawOnce(); });
+      this.mo.observe(document.documentElement, { attributes: true, attributeFilter: ['data-theme'] });
+      matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => { this.readColors(); this.drawOnce(); });
+
+      // Parallaxe : on écoute le parent (la hero), le canvas ne capte pas les événements.
+      const host = el.parentElement ?? el;
+      this.onMove = (e) => {
+        const r = host.getBoundingClientRect();
+        this.tx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        this.ty = ((e.clientY - r.top) / r.height - 0.5) * 2;
+      };
+      this.onLeave = () => { this.tx = 0; this.ty = 0; };
+      host.addEventListener('pointermove', this.onMove, { passive: true });
+      host.addEventListener('pointerleave', this.onLeave);
+      this.onVis = () => (document.hidden ? this.stop() : this.visible && this.start());
+      document.addEventListener('visibilitychange', this.onVis);
+
+      this.drawOnce();
+      if (!this.reduced) this.start();
+    }
+
+    readColors() {
+      const cs = getComputedStyle(document.documentElement);
+      this.colors = {
+        ink: cs.getPropertyValue('--node').trim() || '#000',
+        accent: cs.getPropertyValue('--accent').trim() || '#0f6b4f',
+        warn: cs.getPropertyValue('--warn').trim() || '#c2571f',
+        line: cs.getPropertyValue('--ink-3').trim() || '#777',
+      };
+    }
+
+    resize() {
+      this.dpr = Math.min(2, window.devicePixelRatio || 1);
+      this.w = this.el.clientWidth; this.h = this.el.clientHeight;
+      this.canvas.width = Math.round(this.w * this.dpr);
+      this.canvas.height = Math.round(this.h * this.dpr);
+      this.ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    }
+
+    /** Grille lâche + jitter, quelques hubs, liens vers les plus proches. */
+    build(count: number) {
+      const { w, h } = this;
+      const n = w < 640 ? Math.round(count * 0.5) : count;
+      const cols = Math.max(3, Math.round(Math.sqrt(n * (w / Math.max(h, 1)))));
+      const rows = Math.max(2, Math.ceil(n / cols));
+      const cw = w / cols, ch = h / rows;
+      this.nodes = [];
+      let li = 0;
+      for (let i = 0; i < n; i++) {
+        const c = i % cols, r = Math.floor(i / cols);
+        const x = cw * c + rand(cw * 0.2, cw * 0.8);
+        const y = ch * r + rand(ch * 0.2, ch * 0.8);
+        const hub = (c % 2 === 1 && r % 2 === 1) || Math.random() < 0.12;
+        const label = hub && li < LABELS.length && Math.random() < 0.9 ? LABELS[li++] : undefined;
+        this.nodes.push({ x, y, bx: x, by: y, depth: rand(0.4, 1), hub, phase: rand(0, Math.PI * 2), label, ping: 0 });
+      }
+      // Liens : chaque nœud vers ses 2 plus proches (3 pour un hub), sans doublon.
+      const key = (a: number, b: number) => (a < b ? `${a}-${b}` : `${b}-${a}`);
+      const seen = new Set<string>();
+      this.edges = [];
+      this.nodes.forEach((node, i) => {
+        const near = this.nodes
+          .map((o, j) => ({ j, d: Math.hypot(o.bx - node.bx, o.by - node.by) }))
+          .filter((o) => o.j !== i)
+          .sort((p, q) => p.d - q.d)
+          .slice(0, node.hub ? 3 : 2);
+        near.forEach(({ j, d }) => {
+          const k = key(i, j);
+          if (seen.has(k)) return;
+          seen.add(k);
+          this.edges.push({ a: i, b: j, dashed: !node.hub && !this.nodes[j].hub && Math.random() < 0.3, len: d });
+        });
+      });
+      this.packets = [];
+      const pk = Math.max(3, Math.round(this.edges.length / 5));
+      for (let i = 0; i < pk; i++) this.spawn();
+    }
+
+    spawn() {
+      if (!this.edges.length) return;
+      this.packets.push({ edge: Math.floor(Math.random() * this.edges.length), t: Math.random(), speed: rand(0.12, 0.3), dir: Math.random() < 0.5 ? 1 : -1 });
+    }
+
+    start() { if (this.running || this.reduced) return; this.running = true; this.last = performance.now(); this.raf = requestAnimationFrame(this.frame); }
+    stop() { this.running = false; cancelAnimationFrame(this.raf); }
+
+    frame = (now: number) => {
+      if (!this.running) return;
+      const dt = Math.min(0.05, (now - this.last) / 1000);
+      this.last = now;
+      this.update(dt, now / 1000);
+      this.draw();
+      this.raf = requestAnimationFrame(this.frame);
+    };
+
+    update(dt: number, t: number) {
+      this.mx += (this.tx - this.mx) * Math.min(1, dt * 3);
+      this.my += (this.ty - this.my) * Math.min(1, dt * 3);
+      for (const n of this.nodes) {
+        // Dérive lente + parallaxe selon la profondeur
+        const drift = 4 + n.depth * 6;
+        n.x = n.bx + Math.sin(t * 0.35 + n.phase) * drift + this.mx * 14 * n.depth;
+        n.y = n.by + Math.cos(t * 0.28 + n.phase * 1.3) * drift * 0.7 + this.my * 10 * n.depth;
+        if (n.ping > 0) { n.ping += dt * 0.9; if (n.ping >= 1) n.ping = 0; }
+      }
+      for (const p of this.packets) {
+        const e = this.edges[p.edge];
+        p.t += (p.speed * p.dir * dt * 140) / Math.max(e.len, 40);
+        if (p.t >= 1 || p.t <= 0) {
+          const arrived = p.dir === 1 ? e.b : e.a;
+          this.nodes[arrived].ping = 0.01;
+          // Repart depuis ce nœud sur un autre lien
+          const next = this.edges.map((ed, i) => ({ ed, i })).filter(({ ed, i }) => i !== p.edge && (ed.a === arrived || ed.b === arrived));
+          if (next.length) {
+            const pick = next[Math.floor(Math.random() * next.length)];
+            p.edge = pick.i; p.dir = pick.ed.a === arrived ? 1 : -1; p.t = p.dir === 1 ? 0 : 1;
+          } else { p.dir = p.dir === 1 ? -1 : 1; p.t = p.dir === 1 ? 0.01 : 0.99; }
+          p.speed = rand(0.12, 0.3);
+        }
+      }
+    }
+
+    drawOnce() { this.update(0, performance.now() / 1000); this.draw(); }
+
+    draw() {
+      const { ctx, w, h, colors } = this;
+      ctx.clearRect(0, 0, w, h);
+      ctx.lineCap = 'round';
+
+      // Liens
+      for (const e of this.edges) {
+        const a = this.nodes[e.a], b = this.nodes[e.b];
+        ctx.beginPath();
+        ctx.moveTo(a.x, a.y); ctx.lineTo(b.x, b.y);
+        ctx.strokeStyle = colors.line;
+        ctx.globalAlpha = 0.28;
+        ctx.lineWidth = 1;
+        ctx.setLineDash(e.dashed ? [3, 5] : []);
+        ctx.stroke();
+      }
+      ctx.setLineDash([]);
+
+      // Paquets
+      for (const p of this.packets) {
+        const e = this.edges[p.edge];
+        const a = this.nodes[e.a], b = this.nodes[e.b];
+        const x = a.x + (b.x - a.x) * p.t, y = a.y + (b.y - a.y) * p.t;
+        ctx.globalAlpha = 0.95;
+        ctx.fillStyle = colors.warn;
+        ctx.beginPath(); ctx.arc(x, y, 2.2, 0, Math.PI * 2); ctx.fill();
+        // Traînée
+        const tx = x - (b.x - a.x) * 0.05 * p.dir, ty = y - (b.y - a.y) * 0.05 * p.dir;
+        ctx.globalAlpha = 0.35; ctx.strokeStyle = colors.warn; ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(x, y); ctx.lineTo(tx, ty); ctx.stroke();
+      }
+
+      // Nœuds
+      for (const n of this.nodes) {
+        if (n.ping > 0) {
+          ctx.globalAlpha = (1 - n.ping) * 0.6;
+          ctx.strokeStyle = colors.accent; ctx.lineWidth = 1.2;
+          ctx.beginPath(); ctx.arc(n.x, n.y, 4 + n.ping * 22, 0, Math.PI * 2); ctx.stroke();
+        }
+        ctx.globalAlpha = 0.35 + n.depth * 0.55;
+        if (n.hub) {
+          ctx.fillStyle = colors.ink;
+          ctx.fillRect(n.x - 4, n.y - 4, 8, 8);
+          ctx.globalAlpha = 1; ctx.fillStyle = colors.accent;
+          ctx.fillRect(n.x - 1.5, n.y - 1.5, 3, 3);
+        } else {
+          ctx.fillStyle = colors.ink;
+          ctx.beginPath(); ctx.arc(n.x, n.y, 2.6, 0, Math.PI * 2); ctx.fill();
+        }
+        if (n.label) {
+          ctx.globalAlpha = 0.55;
+          ctx.fillStyle = colors.line;
+          ctx.font = '500 9px "Martian Mono", Consolas, monospace';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(n.label, n.x + 9, n.y + 0.5);
+        }
+      }
+      ctx.globalAlpha = 1;
+    }
+
+    destroy() {
+      this.stop();
+      this.ro.disconnect(); this.io.disconnect(); this.mo.disconnect();
+      const host = this.el.parentElement ?? this.el;
+      host.removeEventListener('pointermove', this.onMove);
+      host.removeEventListener('pointerleave', this.onLeave);
+      document.removeEventListener('visibilitychange', this.onVis);
+    }
+  }
+
+  let fields: Field[] = [];
+  function mount() {
+    fields.forEach((f) => f.destroy());
+    fields = [];
+    const els = document.querySelectorAll<HTMLElement>('[data-netfield]');
+    if (!els.length) return;
+    const go = () => els.forEach((el) => fields.push(new Field(el)));
+    // Attendre la police mono pour les étiquettes du canvas.
+    (document.fonts?.ready ?? Promise.resolve()).then(go, go);
+  }
+  document.addEventListener('astro:page-load', mount);
+  document.addEventListener('astro:before-swap', () => { fields.forEach((f) => f.destroy()); fields = []; });
+</script>

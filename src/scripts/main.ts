@@ -3,20 +3,41 @@
  * Réinitialisé à chaque navigation (ClientRouter).
  */
 import { initEasterEggs } from './eggs';
+import { initReveal, initProgress } from './motion';
+
+function applyTheme(next: 'dark' | 'light') {
+  document.documentElement.setAttribute('data-theme', next);
+  try {
+    localStorage.setItem('theme', next);
+  } catch {
+    /* stockage indisponible */
+  }
+}
 
 function initTheme() {
   const root = document.documentElement;
   document.querySelectorAll<HTMLButtonElement>('[data-theme-toggle]').forEach((btn) => {
-    btn.addEventListener('click', () => {
+    btn.addEventListener('click', (e) => {
       const systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
       const current = root.getAttribute('data-theme') ?? (systemDark ? 'dark' : 'light');
       const next = current === 'dark' ? 'light' : 'dark';
-      root.setAttribute('data-theme', next);
-      try {
-        localStorage.setItem('theme', next);
-      } catch {
-        /* stockage indisponible */
+
+      // Cercle qui s'ouvre depuis le bouton (View Transitions API), sinon bascule sèche.
+      const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+      const doc = document as Document & { startViewTransition?: (cb: () => void) => { finished: Promise<void> } };
+      if (reduced || !doc.startViewTransition) {
+        applyTheme(next);
+        return;
       }
+      const x = e.clientX || btn.getBoundingClientRect().left + btn.offsetWidth / 2;
+      const y = e.clientY || btn.getBoundingClientRect().top + btn.offsetHeight / 2;
+      const r = Math.hypot(Math.max(x, innerWidth - x), Math.max(y, innerHeight - y));
+      root.style.setProperty('--vt-x', `${x}px`);
+      root.style.setProperty('--vt-y', `${y}px`);
+      root.style.setProperty('--vt-r', `${r}px`);
+      root.classList.add('theme-vt');
+      const t = doc.startViewTransition(() => applyTheme(next));
+      t.finished.finally(() => root.classList.remove('theme-vt'));
     });
   });
 }
@@ -64,5 +85,7 @@ document.addEventListener('astro:page-load', () => {
   initTheme();
   initMenu();
   initCopy();
+  initReveal();
 });
+initProgress();
 initEasterEggs();

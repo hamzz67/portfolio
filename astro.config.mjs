@@ -33,25 +33,28 @@ export default defineConfig({
 
   /**
    * Polices auto-hébergées (fichiers lus dans node_modules, aucun appel externe au runtime).
-   * - IBM Plex Sans : texte et titres (une seule famille, poids 400 à 600)
-   * - IBM Plex Mono : dates, références, métadonnées (usage limité)
+   * - Archivo : texte et titres. Fichier « standard » = deux axes variables
+   *   (graisse 100→900, chasse 62→125 %) : les titres utilisent la chasse élargie.
+   * - Martian Mono : dates, références, métadonnées (usage limité)
    */
   fonts: [
     {
       provider: fontProviders.local(),
-      name: 'IBM Plex Sans',
+      name: 'Archivo',
       cssVariable: '--font-sans',
       fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
       options: {
         variants: [
           {
-            src: ['@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2'],
-            weight: '100 700',
+            src: ['@fontsource-variable/archivo/files/archivo-latin-standard-normal.woff2'],
+            weight: '100 900',
+            stretch: '62% 125%',
             style: 'normal',
           },
           {
-            src: ['@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-italic.woff2'],
-            weight: '100 700',
+            src: ['@fontsource-variable/archivo/files/archivo-latin-standard-italic.woff2'],
+            weight: '100 900',
+            stretch: '62% 125%',
             style: 'italic',
           },
         ],
@@ -59,13 +62,16 @@ export default defineConfig({
     },
     {
       provider: fontProviders.local(),
-      name: 'IBM Plex Mono',
+      name: 'Martian Mono',
       cssVariable: '--font-mono',
       fallbacks: ['Consolas', 'Menlo', 'monospace'],
       options: {
         variants: [
-          { src: ['@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2'], weight: 400, style: 'normal' },
-          { src: ['@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2'], weight: 500, style: 'normal' },
+          {
+            src: ['@fontsource-variable/martian-mono/files/martian-mono-latin-wght-normal.woff2'],
+            weight: '100 800',
+            style: 'normal',
+          },
         ],
       },
     },

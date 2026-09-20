@@ -1,9 +1,12 @@
 ---
 import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
 import ProjectCard from '@/components/ProjectCard.astro';
 import Timeline from '@/components/Timeline.astro';
 import EmptyState from '@/components/EmptyState.astro';
 import ContactBlock from '@/components/ContactBlock.astro';
+import NetworkField from '@/components/NetworkField.astro';
+import Stamp from '@/components/Stamp.astro';
 import { profile, isPlaceholder } from '@/data/profile';
 import { skillDomains } from '@/data/skills';
 import { getFeaturedProjects, getProjects } from '@/lib/projects';
@@ -11,6 +14,7 @@ import { getFeaturedProjects, getProjects } from '@/lib/projects';
 const featured = await getFeaturedProjects();
 const projects = await getProjects();
 const stage = projects.find((p) => p.data.kind === 'stage');
+const nameWords = profile.name.split(' ');
 
 const links = [
   { label: 'GitHub', href: profile.links.github },
@@ -23,30 +27,32 @@ const links = [
   title={`${profile.name} — Portfolio BTS SIO SISR`}
   description={`${profile.tagline} Portfolio de formation : travaux, stage, projets et compétences.`}
 >
-  <!-- ======= Introduction ======= -->
-  <section class="intro" id="apropos" aria-labelledby="intro-title">
-    <div class="container cols">
-      <div class="intro__main">
-        <h1 id="intro-title">{profile.name}</h1>
-        <p class="intro__tagline">{profile.tagline}</p>
-        <div class="intro__about">
-          {profile.about.map((p) => <p>{p}</p>)}
+  <!-- ======= Hero ======= -->
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="grid-bg"></div>
+    <NetworkField />
+
+    <div class="container hero__inner">
+      <div class="hero__main">
+        <p class="hero__kicker mono rise">
+          <span class="hero__blink"></span> portfolio · {profile.studies.label} · 2025 → 2027
+        </p>
+        <h1 id="hero-title" class="hero__title words">
+          {nameWords.map((w, i) => <span class="w" style={`--i:${i}`}>{w}</span>)}
+        </h1>
+        <p class="hero__tagline rise" style="--d:420ms">{profile.tagline}</p>
+        <div class="hero__cta rise" style="--d:560ms">
+          <a href="/travaux" class="btn"><span>Voir mes travaux</span> <Icon name="arrow-right" size={15} /></a>
+          <a href="#apropos" class="btn btn--secondary"><span>En savoir plus</span></a>
         </div>
-        <nav class="intro__jump meta" aria-label="Accès rapide">
-          <span>Aller à</span>
-          <a href="#selection">Projets</a>
-          <a href="#parcours">Parcours</a>
-          <a href="#competences">Compétences</a>
-          <a href="/travaux">Travaux</a>
-          <a href="#contact">Contact</a>
-        </nav>
       </div>
 
-      <aside class="intro__side">
+      <aside class="hero__side rise corners" style="--d:680ms">
+        <span class="corners__b"></span>
         <dl class="facts">
           <div>
             <dt>Formation</dt>
-            <dd>{profile.studies.label}<br /><span class="meta">{profile.school}, {profile.city} · 2025 → 2027</span></dd>
+            <dd>{profile.studies.label}<br /><span class="meta">{profile.school}, {profile.city}</span></dd>
           </div>
           {stage && (
             <div>
@@ -73,12 +79,48 @@ const links = [
         </dl>
       </aside>
     </div>
+
+    <div class="container hero__foot rise" style="--d:900ms">
+      <a href="#apropos" class="hero__scroll mono" aria-label="Défiler vers la présentation">
+        <span>défiler</span>
+        <Icon name="arrow-down" size={13} />
+      </a>
+      <Stamp class="hero__stamp" size={112} />
+    </div>
+  </section>
+
+  <!-- ======= En bref ======= -->
+  <section class="section" id="apropos" aria-labelledby="apropos-title">
+    <div class="container cols">
+      <div>
+        <div class="head" data-index="01 — En bref">
+          <h2 id="apropos-title">Un profil orienté infrastructures</h2>
+        </div>
+        <div class="about">
+          {profile.about.map((p) => <p data-reveal>{p}</p>)}
+        </div>
+        <nav class="jump meta" aria-label="Accès rapide" data-reveal>
+          <span>Aller à</span>
+          <a href="#selection">Projets</a>
+          <a href="#parcours">Parcours</a>
+          <a href="#competences">Compétences</a>
+          <a href="/travaux">Travaux</a>
+          <a href="#contact">Contact</a>
+        </nav>
+      </div>
+      <aside class="focus" data-reveal>
+        <p class="kicker">Domaines</p>
+        <ul class="tags" role="list">
+          {profile.focus.map((f) => <li class="tag">{f}</li>)}
+        </ul>
+      </aside>
+    </div>
   </section>
 
   <!-- ======= Sélection ======= -->
   <section class="section" id="selection" aria-labelledby="selection-title">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="02 — Sélection">
         <h2 id="selection-title">Travaux sélectionnés</h2>
         <p>Les fiches les plus représentatives. <a class="link" href="/travaux">Voir toute la bibliothèque</a></p>
       </div>
@@ -96,13 +138,13 @@ const links = [
   <section class="section" id="parcours" aria-labelledby="parcours-title">
     <div class="container cols">
       <div>
-        <div class="head">
-          <h2 id="parcours-title">Parcours</h2>
-          <p>Deux années de formation, un stage en première année. <a class="link" href="/parcours">Détail et certifications</a></p>
+        <div class="head" data-index="03 — Parcours">
+          <h2 id="parcours-title">Deux années, un stage</h2>
+          <p>Formation en cours au lycée René Cassin. <a class="link" href="/parcours">Détail et certifications</a></p>
         </div>
         <Timeline compact />
       </div>
-      <aside class="side-note meta">
+      <aside class="side-note meta" data-reveal>
         <p>{profile.studies.fullLabel}.</p>
       </aside>
     </div>
@@ -111,13 +153,13 @@ const links = [
   <!-- ======= Compétences ======= -->
   <section class="section" id="competences" aria-labelledby="competences-title">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="04 — Compétences">
         <h2 id="competences-title">Compétences</h2>
         <p>Par domaine, sans pourcentages : chaque compétence renvoie aux fiches qui la mettent en œuvre. <a class="link" href="/competences">Vue détaillée</a></p>
       </div>
       <dl class="skills-grid">
         {skillDomains.map((domain) => (
-          <div class="skills-grid__item">
+          <div class="skills-grid__item" data-reveal>
             <dt><a href={`/competences#${domain.id}`}>{domain.label}</a></dt>
             <dd>
               {domain.skills.some((s) => !s.placeholder)
@@ -133,7 +175,7 @@ const links = [
   <!-- ======= Contact ======= -->
   <section class="section" id="contact" aria-labelledby="contact-title">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="05 — Contact">
         <h2 id="contact-title">Contact</h2>
         <p>{profile.availability}</p>
       </div>
@@ -143,31 +185,82 @@ const links = [
 </Base>
 
 <style>
-  .intro { padding-block: var(--s-7) var(--s-7); border-bottom: 1px solid var(--line); }
-  @media (min-width: 900px) { .intro { padding-block: var(--s-8) var(--s-8); } }
-  .intro__main { max-width: var(--measure); }
-  .intro__main h1 { font-size: var(--text-3xl); }
-  .intro__tagline { margin-top: var(--s-3); font-size: var(--text-lg); line-height: 1.4; color: var(--ink-2); text-wrap: pretty; }
-  .intro__about { margin-top: var(--s-5); font-size: var(--text-md); color: var(--ink-2); }
-  .intro__about p:first-child { color: var(--ink); }
-  .intro__jump { margin-top: var(--s-5); display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; }
-  .intro__jump a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-strong); }
-  .intro__jump a:hover { color: var(--accent); text-decoration-color: currentColor; }
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative; overflow: hidden;
+    padding-block: var(--s-8) var(--s-6);
+    border-bottom: 1px solid var(--line);
+    min-height: calc(100svh - var(--header-h));
+    display: flex; flex-direction: column; justify-content: center;
+  }
+  @media (min-width: 900px) { .hero { padding-block: var(--s-9) var(--s-6); } }
+  .hero :global(.netfield) {
+    -webkit-mask-image: radial-gradient(ellipse 70% 90% at 78% 45%, #000 20%, transparent 78%);
+    mask-image: radial-gradient(ellipse 70% 90% at 78% 45%, #000 20%, transparent 78%);
+    opacity: 0.9;
+  }
+  @media (max-width: 899px) {
+    .hero :global(.netfield) {
+      -webkit-mask-image: radial-gradient(ellipse 90% 60% at 50% 20%, #000 10%, transparent 80%);
+      mask-image: radial-gradient(ellipse 90% 60% at 50% 20%, #000 10%, transparent 80%);
+      opacity: 0.55;
+    }
+  }
+  .hero__inner { position: relative; z-index: 1; display: grid; gap: var(--s-7); align-items: end; }
+  @media (min-width: 900px) { .hero__inner { grid-template-columns: minmax(0, 1fr) 300px; gap: var(--s-8); } }
 
-  .facts { margin: 0; border-top: 1px solid var(--line); }
-  .facts div { padding: 0.7rem 0; border-bottom: 1px solid var(--line); }
-  .facts dt { font-size: var(--text-xs); font-weight: 500; color: var(--ink-3); margin-bottom: 0.15rem; }
+  .hero__kicker { display: flex; align-items: center; gap: 0.6rem; color: var(--ink-3); margin-bottom: var(--s-5); letter-spacing: 0.04em; }
+  .hero__blink { width: 7px; height: 7px; border-radius: 50%; background: var(--accent); animation: blink 2.2s steps(1) infinite; }
+  @keyframes blink { 50% { opacity: 0.25; } }
+
+  .hero__title {
+    font-size: var(--text-hero); line-height: 0.95; letter-spacing: -0.035em;
+    font-weight: 700; font-stretch: 118%;
+    display: flex; flex-direction: column; align-items: flex-start;
+  }
+  .hero__title .w:nth-child(2) { color: var(--accent); }
+  .hero__tagline {
+    margin-top: var(--s-5); max-width: 34ch;
+    font-size: var(--text-lg); line-height: 1.4; color: var(--ink-2); text-wrap: pretty;
+  }
+  .hero__cta { margin-top: var(--s-6); display: flex; flex-wrap: wrap; gap: 0.6rem; }
+
+  .hero__side { padding: var(--s-4) var(--s-5); background: color-mix(in srgb, var(--bg) 78%, transparent); -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+  .facts { margin: 0; }
+  .facts div { padding: 0.65rem 0; border-bottom: 1px solid var(--line); }
+  .facts div:last-child { border-bottom: 0; }
+  .facts dt { font-family: var(--font-mono); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-3); margin-bottom: 0.2rem; }
   .facts dd { margin: 0; font-size: var(--text-sm); line-height: 1.5; }
   .facts__links { display: flex; flex-wrap: wrap; gap: 0.75rem; }
-  @media (min-width: 900px) { .intro__side { padding-top: 0.5rem; } }
+
+  .hero__foot { position: relative; z-index: 1; margin-top: var(--s-7); display: flex; align-items: flex-end; justify-content: space-between; }
+  .hero__scroll { display: inline-flex; align-items: center; gap: 0.4rem; color: var(--ink-3); letter-spacing: 0.08em; text-transform: uppercase; }
+  .hero__scroll :global(.icon) { animation: nudge 1.8s var(--ease-in-out) infinite; }
+  @keyframes nudge { 50% { transform: translateY(3px); } }
+  .hero__scroll:hover { color: var(--accent); }
+  @media (max-width: 899px) { .hero__stamp { display: none; } }
+
+  /* ---------- En bref ---------- */
+  .about { font-size: var(--text-md); color: var(--ink-2); max-width: var(--measure); }
+  .about p:first-child { color: var(--ink); font-size: var(--text-lg); line-height: 1.45; }
+  .jump { margin-top: var(--s-5); display: flex; flex-wrap: wrap; gap: 0.25rem 0.9rem; }
+  .jump a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-strong); transition: color var(--dur); }
+  .jump a:hover { color: var(--accent); text-decoration-color: currentColor; }
+  .focus { padding-top: 0.25rem; }
 
   .side-note { max-width: 32ch; }
   @media (min-width: 900px) { .side-note { padding-top: 0.35rem; } }
 
+  /* ---------- Compétences ---------- */
   .skills-grid { margin: 0; border-top: 1px solid var(--line); }
-  .skills-grid__item { display: grid; grid-template-columns: 1fr; gap: 0.15rem var(--s-5); padding: 0.75rem 0; border-bottom: 1px solid var(--line); }
+  .skills-grid__item {
+    display: grid; grid-template-columns: 1fr; gap: 0.15rem var(--s-5);
+    padding: 0.8rem 0; border-bottom: 1px solid var(--line);
+    transition: padding-left 260ms var(--ease-out), background 260ms;
+  }
   @media (min-width: 640px) { .skills-grid__item { grid-template-columns: 10rem minmax(0, 1fr); } }
+  .skills-grid__item:hover { padding-left: 0.5rem; background: linear-gradient(90deg, var(--accent-soft), transparent 60%); }
   .skills-grid dt { font-weight: 600; }
-  .skills-grid dt a:hover { color: var(--accent); text-decoration: underline; }
+  .skills-grid dt a:hover { color: var(--accent); }
   .skills-grid dd { margin: 0; color: var(--ink-2); }
 </style>

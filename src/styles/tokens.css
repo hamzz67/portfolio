@@ -1,37 +1,49 @@
 /* ==========================================================================
-   DESIGN TOKENS
-   Une famille de caractères, une couleur d'accent, des tailles modestes.
+   DESIGN TOKENS — « dossier technique »
+   Papier grainé, encre, un accent vert et un signal orange pour ce qui bouge
+   (paquets, statut « en cours »). Archivo pour tout le texte : les titres
+   utilisent l'axe de chasse (wdth) élargi, les étiquettes la chasse condensée.
    ========================================================================== */
 
 :root {
   color-scheme: light;
 
   /* Surfaces */
-  --bg: #fbfaf8;
-  --bg-2: #f3f1ec;
-  --bg-3: #e9e6df;
+  --bg: #f6f4ee;
+  --bg-2: #ede9e0;
+  --bg-3: #e1dcd0;
+  --bg-elev: #fcfbf8;
 
   /* Texte */
-  --ink: #1b1b19;
-  --ink-2: #4b4a46;
-  --ink-3: #79776f;
+  --ink: #171716;
+  --ink-2: #47463f;
+  --ink-3: #78766c;
 
   /* Traits */
-  --line: #e2dfd7;
-  --line-strong: #c9c5bb;
+  --line: #ddd8cc;
+  --line-strong: #bfb9aa;
 
   /* Accent : vert profond (liens, états actifs) */
-  --accent: #12694f;
-  --accent-hover: #0c5039;
-  --accent-soft: rgb(18 105 79 / 0.09);
+  --accent: #0f6b4f;
+  --accent-hover: #0a5039;
+  --accent-soft: rgb(15 107 79 / 0.1);
+  --accent-ink: #ffffff;
 
-  /* Signal (statuts, à faire) */
-  --warn: #a8571b;
-  --warn-soft: rgb(168 87 27 / 0.1);
+  /* Signal : orange brique (paquets en transit, statuts, à faire) */
+  --warn: #c2571f;
+  --warn-soft: rgb(194 87 31 / 0.12);
+
+  /* Décor : grille, grain, topologie */
+  --grid-line: rgb(23 23 22 / 0.07);
+  --grain-opacity: 0.55;
+  --node: #171716;
+  --node-glow: rgb(15 107 79 / 0.35);
 
   /* Typographie */
-  --font-sans: 'IBM Plex Sans', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
-  --font-mono: 'IBM Plex Mono', Consolas, Menlo, monospace;
+  --font-sans: 'Archivo', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+  --font-mono: 'Martian Mono', Consolas, Menlo, monospace;
+  --display-stretch: 112%;
+  --label-stretch: 88%;
 
   --text-xs: 0.8125rem;   /* 13px */
   --text-sm: 0.875rem;    /* 14px */
@@ -40,7 +52,8 @@
   --text-lg: 1.25rem;     /* 20px */
   --text-xl: 1.5rem;      /* 24px */
   --text-2xl: 1.875rem;   /* 30px */
-  --text-3xl: 2.25rem;    /* 36px */
+  --text-3xl: 2.375rem;   /* 38px */
+  --text-hero: clamp(2.75rem, 7.5vw, 5.25rem);
 
   /* Espacements */
   --s-1: 0.25rem;
@@ -51,50 +64,68 @@
   --s-6: 2rem;
   --s-7: 3rem;
   --s-8: 4.5rem;
+  --s-9: 6.5rem;
   --gutter: clamp(1rem, 4vw, 2rem);
 
   /* Mise en page */
-  --container: 1040px;
+  --container: 1080px;
   --measure: 66ch;
   --header-h: 3.75rem;
   --radius: 3px;
 
+  /* Mouvement */
   --ease: cubic-bezier(0.25, 0.1, 0.25, 1);
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-out: cubic-bezier(0.65, 0, 0.35, 1);
   --dur: 160ms;
+  --dur-slow: 640ms;
+  --reveal-y: 18px;
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #131412;
-  --bg-2: #1b1c1a;
-  --bg-3: #242623;
-  --ink: #e9e7e1;
-  --ink-2: #b4b2aa;
-  --ink-3: #82807a;
-  --line: #2a2c29;
-  --line-strong: #3d403c;
-  --accent: #5fc39a;
-  --accent-hover: #86d5b5;
-  --accent-soft: rgb(95 195 154 / 0.12);
-  --warn: #dd9a5b;
-  --warn-soft: rgb(221 154 91 / 0.14);
+  --bg: #121311;
+  --bg-2: #1a1c19;
+  --bg-3: #242723;
+  --bg-elev: #1f221e;
+  --ink: #ebe8e0;
+  --ink-2: #b5b2a8;
+  --ink-3: #807e75;
+  --line: #2a2d29;
+  --line-strong: #40443f;
+  --accent: #5ec89b;
+  --accent-hover: #8ddbb9;
+  --accent-soft: rgb(94 200 155 / 0.13);
+  --accent-ink: #0c1a14;
+  --warn: #e39a5e;
+  --warn-soft: rgb(227 154 94 / 0.14);
+  --grid-line: rgb(235 232 224 / 0.06);
+  --grain-opacity: 0.35;
+  --node: #ebe8e0;
+  --node-glow: rgb(94 200 155 / 0.4);
 }
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme='light']) {
     color-scheme: dark;
-    --bg: #131412;
-    --bg-2: #1b1c1a;
-    --bg-3: #242623;
-    --ink: #e9e7e1;
-    --ink-2: #b4b2aa;
-    --ink-3: #82807a;
-    --line: #2a2c29;
-    --line-strong: #3d403c;
-    --accent: #5fc39a;
-    --accent-hover: #86d5b5;
-    --accent-soft: rgb(95 195 154 / 0.12);
-    --warn: #dd9a5b;
-    --warn-soft: rgb(221 154 91 / 0.14);
+    --bg: #121311;
+    --bg-2: #1a1c19;
+    --bg-3: #242723;
+    --bg-elev: #1f221e;
+    --ink: #ebe8e0;
+    --ink-2: #b5b2a8;
+    --ink-3: #807e75;
+    --line: #2a2d29;
+    --line-strong: #40443f;
+    --accent: #5ec89b;
+    --accent-hover: #8ddbb9;
+    --accent-soft: rgb(94 200 155 / 0.13);
+    --accent-ink: #0c1a14;
+    --warn: #e39a5e;
+    --warn-soft: rgb(227 154 94 / 0.14);
+    --grid-line: rgb(235 232 224 / 0.06);
+    --grain-opacity: 0.35;
+    --node: #ebe8e0;
+    --node-glow: rgb(94 200 155 / 0.4);
   }
 }

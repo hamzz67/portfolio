@@ -19,14 +19,14 @@ const statusLabel = { obtenue: 'obtenue', 'en-cours': 'en cours', prevue: 'prév
   <section class="section">
     <div class="container cols">
       <div>
-        <div class="head">
+        <div class="head" data-index="01 — Formation">
           <h1>Parcours</h1>
           <p>{profile.studies.fullLabel}. {profile.goal}</p>
         </div>
         <Timeline />
       </div>
 
-      <aside class="side">
+      <aside class="side" data-reveal>
         <dl class="facts">
           <div>
             <dt>Formation</dt>
@@ -52,7 +52,7 @@ const statusLabel = { obtenue: 'obtenue', 'en-cours': 'en cours', prevue: 'prév
 
   <section class="section" id="certifications" aria-labelledby="certif-title">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="02 — Certifications">
         <h2 id="certif-title">Certifications et formations</h2>
         <p>Certifications officielles, badges (Cisco Networking Academy, etc.) et formations complémentaires, ajoutés au fur et à mesure.</p>
       </div>
@@ -60,7 +60,7 @@ const statusLabel = { obtenue: 'obtenue', 'en-cours': 'en cours', prevue: 'prév
       {certifications.length > 0 ? (
         <ul class="rows" role="list">
           {certifications.map((c) => (
-            <li class="cert row">
+            <li class="cert row" data-reveal>
               <time class="mono" datetime={c.date}>{formatMonthCap(c.date)}</time>
               <div class="cert__body">
                 <p class="row-title">

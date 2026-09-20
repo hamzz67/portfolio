@@ -10,21 +10,43 @@ const links = [
 ---
 
 <footer class="footer">
-  <div class="container footer__inner">
-    <p class="meta">© {year} {profile.name} · {profile.school}, {profile.city}</p>
-    <ul class="footer__links meta" role="list">
-      {links.map((l) => (
-        <li><a href={l.href} target={l.href?.startsWith('http') ? '_blank' : undefined} rel={l.href?.startsWith('http') ? 'me noopener' : undefined}>{l.label}</a></li>
-      ))}
-      <li><a href="/presentation">Présentation</a></li>
-      <li><a href="/.well-known/security.txt" title="RFC 9116">security.txt</a></li>
-    </ul>
+  <div class="container">
+    <p class="footer__mark" aria-hidden="true" data-reveal>
+      <span class="footer__mark-word">{profile.firstName}</span>
+      <span class="footer__mark-word footer__mark-word--outline">{profile.name.replace(profile.firstName, '').trim()}</span>
+    </p>
+    <div class="footer__inner">
+      <p class="meta">© {year} {profile.name} · {profile.school}, {profile.city}</p>
+      <ul class="footer__links meta" role="list">
+        {links.map((l) => (
+          <li><a href={l.href} target={l.href?.startsWith('http') ? '_blank' : undefined} rel={l.href?.startsWith('http') ? 'me noopener' : undefined}>{l.label}</a></li>
+        ))}
+        <li><a href="/presentation">Présentation</a></li>
+        <li><a href="/.well-known/security.txt" title="RFC 9116">security.txt</a></li>
+      </ul>
+      <p class="meta footer__stack mono">statique · sans tracker · fait à Strasbourg</p>
+    </div>
   </div>
 </footer>
 
 <style>
-  .footer { margin-top: var(--s-8); border-top: 1px solid var(--line); padding-block: var(--s-5); }
-  .footer__inner { display: flex; flex-wrap: wrap; justify-content: space-between; gap: var(--s-2) var(--s-5); }
+  .footer { margin-top: var(--s-8); border-top: 1px solid var(--line); padding-block: var(--s-6) var(--s-5); overflow: hidden; position: relative; }
+  .footer__mark {
+    display: flex; flex-wrap: wrap; gap: 0 0.18em;
+    font-size: clamp(3rem, 12vw, 8.5rem); line-height: 0.9; font-weight: 750; font-stretch: 120%;
+    letter-spacing: -0.04em; color: var(--ink);
+    margin-bottom: var(--s-6); user-select: none;
+  }
+  .footer__mark-word--outline {
+    color: transparent;
+    -webkit-text-stroke: 1px var(--line-strong);
+    transition: -webkit-text-stroke-color 400ms, color 400ms;
+  }
+  .footer__mark:hover .footer__mark-word--outline { -webkit-text-stroke-color: var(--accent); }
+  .footer__inner { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: var(--s-2) var(--s-5); }
   .footer__links { display: flex; flex-wrap: wrap; gap: var(--s-4); }
-  .footer__links a:hover { color: var(--accent); text-decoration: underline; }
+  .footer__links a { transition: color var(--dur); }
+  .footer__links a:hover { color: var(--accent); }
+  .footer__stack { width: 100%; letter-spacing: 0.04em; }
+  @media (min-width: 900px) { .footer__stack { width: auto; } }
 </style>

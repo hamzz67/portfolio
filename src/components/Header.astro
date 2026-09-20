@@ -18,6 +18,7 @@ const isActive = (href: string) => href !== '/#contact' && (path === href || pat
 <header class="header" id="site-header">
   <div class="container header__inner">
     <a href="/" class="header__brand">
+      <span class="header__mark" aria-hidden="true"><span></span></span>
       <span class="header__name">{profile.name}</span>
       <span class="header__role">BTS SIO SISR</span>
     </a>
@@ -55,37 +56,76 @@ const isActive = (href: string) => href !== '/#contact' && (path === href || pat
       </ul>
     </nav>
   </div>
+  <span class="header__progress" aria-hidden="true"></span>
 </header>
 
 <style>
   .header {
     position: sticky; top: 0; z-index: 100;
-    background: var(--bg);
-    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 82%, transparent);
+    -webkit-backdrop-filter: blur(14px) saturate(1.2);
+    backdrop-filter: blur(14px) saturate(1.2);
+    border-bottom: 1px solid transparent;
+    transition: border-color 240ms var(--ease), background 240ms var(--ease);
   }
+  :global(html.is-scrolled) .header { border-bottom-color: var(--line); }
   .header__inner { display: flex; align-items: center; justify-content: space-between; gap: var(--s-4); height: var(--header-h); }
+
   .header__brand { display: flex; align-items: baseline; gap: 0.6rem; min-width: 0; }
-  .header__name { font-weight: 600; letter-spacing: -0.01em; white-space: nowrap; }
-  .header__role { font-size: var(--text-xs); color: var(--ink-3); white-space: nowrap; }
+  .header__mark {
+    align-self: center; position: relative;
+    width: 0.65rem; height: 0.65rem; border-radius: 50%;
+    background: var(--accent);
+  }
+  .header__mark span {
+    position: absolute; inset: 0; border-radius: 50%;
+    border: 1.5px solid var(--accent);
+    animation: mark-ping 2.8s var(--ease-out) infinite;
+  }
+  @keyframes mark-ping {
+    0% { transform: scale(1); opacity: 0.8; }
+    70%, 100% { transform: scale(2.6); opacity: 0; }
+  }
+  .header__name { font-weight: 650; letter-spacing: -0.01em; white-space: nowrap; }
+  .header__role { font-family: var(--font-mono); font-size: 0.68rem; letter-spacing: 0.06em; color: var(--ink-3); white-space: nowrap; }
 
   .header__nav { display: none; }
-  .header__nav ul { display: flex; gap: 0.25rem; }
+  .header__nav ul { display: flex; gap: 0.1rem; }
   .header__nav a {
-    display: inline-block; padding: 0.35rem 0.6rem;
+    position: relative; display: inline-block; padding: 0.35rem 0.65rem;
     font-size: var(--text-sm); color: var(--ink-2);
-    border-radius: var(--radius);
-    transition: color var(--dur), background var(--dur);
+    transition: color var(--dur);
   }
-  .header__nav a:hover { color: var(--ink); background: var(--bg-2); }
-  .header__nav a[aria-current='page'] { color: var(--ink); font-weight: 500; box-shadow: inset 0 -2px 0 var(--accent); border-radius: 0; }
+  .header__nav a::after {
+    content: ''; position: absolute; left: 0.65rem; right: 0.65rem; bottom: 0.15rem;
+    height: 2px; background: var(--accent);
+    transform: scaleX(0); transform-origin: right;
+    transition: transform 280ms var(--ease-out);
+  }
+  .header__nav a:hover { color: var(--ink); }
+  .header__nav a:hover::after { transform: scaleX(1); transform-origin: left; }
+  .header__nav a[aria-current='page'] { color: var(--ink); font-weight: 500; }
+  .header__nav a[aria-current='page']::after { transform: scaleX(1); }
 
   .header__tools { display: flex; align-items: center; gap: 0.15rem; }
   .header__tool {
     display: inline-flex; align-items: center; justify-content: center;
-    width: 2.25rem; height: 2.25rem; border-radius: var(--radius);
-    color: var(--ink-2); transition: color var(--dur), background var(--dur);
+    width: 2.25rem; height: 2.25rem; border-radius: 50%;
+    color: var(--ink-2); transition: color var(--dur), background var(--dur), transform var(--dur) var(--ease-out);
   }
   .header__tool:hover { color: var(--ink); background: var(--bg-2); }
+  .header__tool:active { transform: scale(0.92); }
+  .header__tool :global(.theme-icon) { transition: transform 400ms var(--ease-out); }
+  .header__tool:hover :global(.theme-icon) { transform: rotate(40deg); }
+
+  /* Progression de lecture : trait fin en bas de l'en-tête, --scroll fourni par motion.ts */
+  .header__progress {
+    position: absolute; left: 0; bottom: -1px; height: 2px; width: 100%;
+    background: var(--accent);
+    transform: scaleX(var(--scroll, 0)); transform-origin: left;
+    opacity: 0; transition: opacity 240ms;
+  }
+  :global(html.is-scrolled) .header__progress { opacity: 1; }
 
   .header__tool :global(.theme-icon--moon) { display: block; }
   .header__tool :global(.theme-icon--sun) { display: none; }

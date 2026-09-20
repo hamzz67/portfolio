@@ -18,7 +18,7 @@ const first = order[0];
   <section class="section">
     <div class="container cols">
       <div>
-        <div class="head">
+        <div class="head" data-index="Lecture guidée">
           <h1>Mode présentation</h1>
           <p>Pour une présentation orale : la navigation est masquée, le texte est agrandi et le clavier permet de passer d’une section à l’autre. Ce n’est pas un diaporama, c’est le portfolio en lecture guidée.</p>
           {first && <p><a href={`/travaux/${first.id}?presentation`} class="btn">Démarrer avec la première fiche</a></p>}
@@ -27,7 +27,7 @@ const first = order[0];
         {order.length > 0 ? (
           <ol class="rows" role="list">
             {order.map((p, i) => (
-              <li class="pres row">
+              <li class="pres row" data-reveal>
                 <span class="mono pres__num">{String(i + 1).padStart(2, '0')}</span>
                 <div>
                   <p class="row-title"><a href={`/travaux/${p.id}?presentation`}>{p.data.title}</a></p>
@@ -41,7 +41,7 @@ const first = order[0];
         )}
       </div>
 
-      <aside class="help">
+      <aside class="help" data-reveal>
         <p class="kicker">Raccourcis clavier</p>
         <dl class="keys">
           <div><dt><kbd>↓</kbd> <kbd>Espace</kbd></dt><dd>Section suivante</dd></div>

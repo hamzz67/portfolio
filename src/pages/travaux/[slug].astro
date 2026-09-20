@@ -55,11 +55,12 @@ const jsonLd = {
 <Base title={d.title} description={d.summary} type="article" jsonLd={jsonLd} image={d.cover ? d.cover.src : undefined}>
   <article class="fiche" data-presentation-root data-position={position} data-total={order.length}>
     <header class="fiche__head">
-      <div class="container">
-        <p class="fiche__crumb meta"><a href="/travaux">Travaux</a> / {kind.plural} / <span class="mono">{ref}</span></p>
-        <h1 class="fiche__title" transition:name={`title-${project.id}`}>{d.title}</h1>
-        <p class="fiche__summary">{d.summary}</p>
-        <div class="fiche__actions">
+      <div class="grid-bg"></div>
+      <div class="container fiche__head-inner">
+        <p class="fiche__crumb meta rise"><a href="/travaux">Travaux</a> / {kind.plural} / <span class="mono">{ref}</span></p>
+        <h1 class="fiche__title rise" style="--d:80ms" transition:name={`title-${project.id}`}>{d.title}</h1>
+        <p class="fiche__summary rise" style="--d:180ms">{d.summary}</p>
+        <div class="fiche__actions rise" style="--d:280ms">
           <button type="button" class="btn btn--secondary btn--sm" data-presentation-start>
             <Icon name="presentation" size={14} /> Présenter cette fiche
           </button>
@@ -210,10 +211,15 @@ const jsonLd = {
 </Base>
 
 <style>
-  .fiche__head { padding-block: var(--s-7) var(--s-6); border-bottom: 1px solid var(--line); }
+  .fiche__head { position: relative; overflow: hidden; padding-block: var(--s-7) var(--s-6); border-bottom: 1px solid var(--line); }
+  .fiche__head :global(.grid-bg) {
+    -webkit-mask-image: radial-gradient(ellipse 60% 100% at 90% 50%, #000 10%, transparent 80%);
+    mask-image: radial-gradient(ellipse 60% 100% at 90% 50%, #000 10%, transparent 80%);
+  }
+  .fiche__head-inner { position: relative; z-index: 1; }
   .fiche__crumb { margin-bottom: var(--s-4); }
   .fiche__crumb a:hover { color: var(--accent); text-decoration: underline; }
-  .fiche__title { font-size: var(--text-2xl); max-width: 28ch; }
+  .fiche__title { font-size: var(--text-3xl); max-width: 26ch; }
   .fiche__summary { margin-top: var(--s-3); max-width: var(--measure); font-size: var(--text-md); color: var(--ink-2); }
   .fiche__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: var(--s-5); }
 

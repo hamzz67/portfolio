@@ -42,7 +42,7 @@ const usedCategories = Object.entries(galleryCategories).filter(([key]) => items
 >
   <section class="section">
     <div class="container">
-      <div class="head">
+      <div class="head" data-index="Galerie">
         <h1>Galerie</h1>
         <p>{items.length} image{items.length > 1 ? 's' : ''} : captures d’écran, schémas et architectures. Les images des fiches de travaux sont ajoutées automatiquement.</p>
       </div>
@@ -58,7 +58,7 @@ const usedCategories = Object.entries(galleryCategories).filter(([key]) => items
 
           <ul class="gallery" role="list" data-gallery>
             {items.map((item) => (
-              <li class="gallery__item" data-category={item.category}>
+              <li class="gallery__item" data-category={item.category} data-reveal>
                 <a href={item.src.src} class="gallery__link" data-lightbox data-caption={item.caption ?? item.alt} aria-label={`Agrandir : ${item.alt}`}>
                   <Image src={item.src} alt={item.alt} width={800} widths={[480, 800, 1200]} sizes="(min-width: 900px) 33vw, (min-width: 640px) 50vw, 100vw" loading="lazy" />
                 </a>

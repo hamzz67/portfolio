@@ -33,6 +33,7 @@ const more = d.technologies.length - techs.length;
   data-context={d.context ? slugify(d.context) : ''}
   data-status={d.status}
   data-search={searchIndex(project)}
+  data-reveal
 >
   <div class="work__side">
     <time class="mono" datetime={d.date.toISOString().slice(0, 10)}>{formatMonthCap(d.date)}</time>
@@ -66,20 +67,42 @@ const more = d.technologies.length - techs.length;
 
 <style>
   .work {
+    position: relative;
     display: grid;
     grid-template-columns: 1fr;
     gap: var(--s-2) var(--s-5);
     padding: var(--s-5) 0;
     border-bottom: 1px solid var(--line);
+    transition: padding-left 280ms var(--ease-out);
+  }
+  /* Survol : liseré accent qui monte à gauche + léger décalage */
+  .work::before {
+    content: ''; position: absolute; left: -0.9rem; top: 0.9rem; bottom: 0.9rem; width: 2px;
+    background: var(--accent);
+    transform: scaleY(0); transform-origin: bottom;
+    transition: transform 280ms var(--ease-out);
   }
   @media (min-width: 720px) {
     .work { grid-template-columns: 8.5rem minmax(0, 1fr); }
     .work--thumb { grid-template-columns: 8.5rem minmax(0, 1fr) 160px; }
+    .work:hover { padding-left: 0.5rem; }
+    .work:hover::before { transform: scaleY(1); transform-origin: top; }
+    .work::before { left: 0; }
   }
   .work__side { display: flex; gap: var(--s-3); color: var(--ink-3); }
   @media (min-width: 720px) { .work__side { flex-direction: column; gap: 0.15rem; padding-top: 0.2rem; } }
   .work__ref { color: var(--ink-3); opacity: 0.8; }
   .work__main { display: flex; flex-direction: column; gap: 0.4rem; min-width: 0; }
+  .work .row-title a { display: inline-flex; align-items: center; gap: 0.4rem; }
+  .work .row-title a::after {
+    content: '→'; font-weight: 400; color: var(--accent);
+    opacity: 0; transform: translateX(-6px);
+    transition: opacity var(--dur), transform 280ms var(--ease-out);
+  }
+  .work:hover .row-title a::after { opacity: 1; transform: none; }
+  .work:hover .work__thumb { border-color: var(--line-strong); }
+  .work__thumb :global(img) { transition: transform 600ms var(--ease-out); }
+  .work:hover .work__thumb :global(img) { transform: scale(1.04); }
   .work__meta { margin-top: -0.15rem; }
   .work__status { color: var(--warn); }
   .work__summary { color: var(--ink-2); max-width: var(--measure); }
