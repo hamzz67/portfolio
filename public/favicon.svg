@@ -1,9 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <style>
-    .bg{fill:#f5f2ec}.fg{fill:#15171c}.ac{stroke:#2438d9}
-    @media (prefers-color-scheme:dark){.bg{fill:#0f1116}.fg{fill:#ece8e0}.ac{stroke:#8f9bff}}
-  </style>
-  <rect class="bg" width="64" height="64" rx="12"/>
-  <path class="ac" d="M10 18v-8h8M46 10h8v8M54 46v8h-8M18 54h-8v-8" fill="none" stroke-width="2.5" stroke-linecap="round"/>
-  <text x="32" y="42" text-anchor="middle" font-family="Georgia, 'Times New Roman', serif" font-style="italic" font-size="28" class="fg">HJ</text>
+  <rect width="64" height="64" rx="10" fill="#12694f"/>
+  <text x="32" y="43" text-anchor="middle" font-family="'IBM Plex Sans', 'Segoe UI', Arial, sans-serif" font-weight="600" font-size="30" letter-spacing="-1" fill="#ffffff">HJ</text>
 </svg>

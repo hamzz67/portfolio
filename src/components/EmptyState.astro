@@ -1,32 +1,24 @@
 ---
 /**
- * État vide propre : utilisé quand une section n'a pas encore de contenu.
- * Indique où ajouter le contenu (fichier), sans inventer quoi que ce soit.
+ * État vide : une note sobre qui indique où ajouter le contenu, sans rien inventer.
  */
 interface Props {
   title: string;
   text?: string;
   /** Fichier à modifier pour ajouter du contenu. */
   file?: string;
-  label?: string;
 }
-const { title, text, file, label = 'À venir' } = Astro.props;
+const { title, text, file } = Astro.props;
 ---
 
-<div class="placeholder reveal">
-  <span class="label">{label}</span>
-  <p class="placeholder__title">{title}</p>
-  {text && <p class="placeholder__text">{text}</p>}
-  {file && (
-    <p class="placeholder__file label">
-      <span class="todo">TODO</span> ajouter dans <code>{file}</code>
-    </p>
-  )}
+<div class="note">
+  <p><strong>{title}</strong></p>
+  {text && <p class="note__text">{text}</p>}
+  {file && <p class="note__file"><span class="todo">TODO</span> ajouter dans <code>{file}</code></p>}
   <slot />
 </div>
 
 <style>
-  .placeholder__text { max-width: 56ch; font-size: var(--text-sm); }
-  .placeholder__file { margin-top: var(--space-4); text-transform: none; letter-spacing: 0.02em; display: flex; gap: 0.5rem; align-items: center; flex-wrap: wrap; }
-  .placeholder__file code { font-size: var(--text-xs); }
+  .note__text { margin-top: 0.4rem; max-width: 60ch; }
+  .note__file { margin-top: 0.6rem; display: flex; flex-wrap: wrap; align-items: center; gap: 0.4rem; }
 </style>

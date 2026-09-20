@@ -27,12 +27,16 @@ const kind = KINDS[d.kind as Kind];
 const category = CATEGORIES[d.category as Category];
 const status = STATUSES[d.status as Status];
 const period = d.endDate ? `${formatMonthCap(d.date)} → ${formatMonthCap(d.endDate)}` : formatMonthCap(d.date);
+const isTodo = (v?: string) => !!v && v.toUpperCase().startsWith('TODO');
+const stripTodo = (v: string) => v.replace(/^TODO\s*[—-]?\s*/i, '');
 
 const meta = [
+  { label: 'Nature', value: kind.label },
+  { label: 'Domaine', value: [category.label, ...d.categories.map((c) => CATEGORIES[c as Category].label)].join(', ') },
+  { label: 'Période', value: period },
   { label: 'Contexte', value: d.context },
   { label: 'Organisation', value: d.organization },
   { label: 'Rôle', value: d.role },
-  { label: 'Période', value: period },
   { label: 'Statut', value: status.label },
 ].filter((m) => m.value);
 
@@ -50,142 +54,86 @@ const jsonLd = {
 
 <Base title={d.title} description={d.summary} type="article" jsonLd={jsonLd} image={d.cover ? d.cover.src : undefined}>
   <article class="fiche" data-presentation-root data-position={position} data-total={order.length}>
-    <!-- ======= En-tête ======= -->
     <header class="fiche__head">
       <div class="container">
-        <nav class="fiche__crumb label" aria-label="Fil d’Ariane">
-          <a href="/travaux">Travaux</a>
-          <span aria-hidden="true">/</span>
-          <span>{kind.plural}</span>
-          <span aria-hidden="true">/</span>
-          <span class="label--ink">{ref}</span>
-        </nav>
-
-        <div class="fiche__tags chips reveal-group">
-          <span class="chip chip--accent reveal">{kind.label}</span>
-          <span class="chip reveal" style="--i:1"><Icon name={category.icon as any} size={12} /> {category.label}</span>
-          {d.categories.map((c, i) => (
-            <span class="chip reveal" style={`--i:${i + 2}`}>{CATEGORIES[c as Category].label}</span>
-          ))}
-          {d.status !== 'termine' && <span class="chip chip--signal reveal" style="--i:4">{status.label}</span>}
-        </div>
-
+        <p class="fiche__crumb meta"><a href="/travaux">Travaux</a> / {kind.plural} / <span class="mono">{ref}</span></p>
         <h1 class="fiche__title" transition:name={`title-${project.id}`}>{d.title}</h1>
         <p class="fiche__summary">{d.summary}</p>
-
         <div class="fiche__actions">
-          <button type="button" class="btn" data-presentation-start>
-            <Icon name="presentation" size={16} /> Présenter cette fiche
+          <button type="button" class="btn btn--secondary btn--sm" data-presentation-start>
+            <Icon name="presentation" size={14} /> Présenter cette fiche
           </button>
-          {d.links.github && (
-            <a href={d.links.github} class="btn btn--secondary" target="_blank" rel="noopener">
-              <Icon name="github" size={16} /> Code source <Icon name="arrow-up-right" size={14} />
-            </a>
-          )}
-          {d.links.demo && (
-            <a href={d.links.demo} class="btn btn--secondary" target="_blank" rel="noopener">
-              Démonstration <Icon name="arrow-up-right" size={14} />
-            </a>
-          )}
+          {d.links.github && <a href={d.links.github} class="btn btn--secondary btn--sm" target="_blank" rel="noopener"><Icon name="github" size={14} /> Code source</a>}
+          {d.links.demo && <a href={d.links.demo} class="btn btn--secondary btn--sm" target="_blank" rel="noopener">Démonstration <Icon name="arrow-up-right" size={13} /></a>}
         </div>
       </div>
     </header>
 
-    <!-- ======= Couverture ======= -->
     {d.cover && (
       <div class="container fiche__cover">
-        <Image
-          src={d.cover}
-          alt={d.coverAlt ?? ''}
-          width={1600}
-          widths={[720, 1200, 1600]}
-          sizes="(min-width: 1360px) 1320px, 100vw"
-          loading="eager"
-          fetchpriority="high"
-          transition:name={`cover-${project.id}`}
-        />
+        <Image src={d.cover} alt={d.coverAlt ?? ''} width={1600} widths={[720, 1200, 1600]} sizes="(min-width: 1080px) 1040px, 100vw" loading="eager" fetchpriority="high" transition:name={`cover-${project.id}`} />
       </div>
     )}
 
-    <!-- ======= Corps ======= -->
     <div class="container fiche__body">
       <aside class="fiche__side">
         <div class="fiche__sticky">
-          {meta.length > 0 && (
-            <dl class="fiche__meta">
-              {meta.map((m) => (
-                <div>
-                  <dt class="label">{m.label}</dt>
-                  <dd class:list={{ 'is-todo': m.value?.toUpperCase().startsWith('TODO') }}>
-                    {m.value?.toUpperCase().startsWith('TODO') ? <><span class="todo">TODO</span> {m.value?.replace(/^TODO\s*[—-]?\s*/i, '')}</> : m.value}
-                  </dd>
-                </div>
-              ))}
-            </dl>
-          )}
-
-          <div class="fiche__block">
-            <p class="label">Technologies</p>
-            {d.technologies.length > 0 ? (
-              <ul class="chips" role="list">
-                {d.technologies.map((t) => (
-                  <li><a class="chip" href={`/travaux?tech=${slugify(t)}`}>{t}</a></li>
-                ))}
-              </ul>
-            ) : (
-              <p class="fiche__todo"><span class="todo">TODO</span> à renseigner dans l’en-tête de la fiche</p>
+          <dl class="facts">
+            {meta.map((m) => (
+              <div>
+                <dt>{m.label}</dt>
+                <dd>{isTodo(m.value) ? <><span class="todo">TODO</span> <span class="meta">{stripTodo(m.value!)}</span></> : m.value}</dd>
+              </div>
+            ))}
+            <div>
+              <dt>Technologies</dt>
+              <dd>
+                {d.technologies.length > 0 ? (
+                  <span class="tags">{d.technologies.map((t) => <a class="tag" href={`/travaux?tech=${slugify(t)}`}>{t}</a>)}</span>
+                ) : (
+                  <span class="meta"><span class="todo">TODO</span> à renseigner dans l’en-tête</span>
+                )}
+              </dd>
+            </div>
+            {d.skills.length > 0 && (
+              <div>
+                <dt>Compétences</dt>
+                <dd>{d.skills.join(', ')}</dd>
+              </div>
             )}
-          </div>
-
-          {d.skills.length > 0 && (
-            <div class="fiche__block">
-              <p class="label">Compétences mobilisées</p>
-              <ul class="fiche__skills" role="list">
-                {d.skills.map((s) => <li>{s}</li>)}
-              </ul>
-            </div>
-          )}
-
-          {d.bts.length > 0 && (
-            <div class="fiche__block">
-              <p class="label">Référentiel BTS SIO</p>
-              <ul class="fiche__bts" role="list">
-                {d.bts.map((b) => (
-                  <li><span class="label label--accent">{b}</span> {BTS_BLOCS[b as BtsBloc].label}</li>
-                ))}
-              </ul>
-            </div>
-          )}
-
-          {d.documents.length > 0 && (
-            <div class="fiche__block">
-              <p class="label">Documents</p>
-              <ul class="fiche__docs" role="list">
-                {d.documents.map((doc) => (
-                  <li>
-                    <a href={doc.href} target="_blank" rel="noopener"><Icon name="file-text" size={16} /> {doc.label} <span class="label">{doc.type}</span></a>
-                    <a href={doc.href} download aria-label={`Télécharger ${doc.label}`} class="fiche__dl"><Icon name="download" size={16} /></a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          )}
+            {d.bts.length > 0 && (
+              <div>
+                <dt>Référentiel BTS</dt>
+                <dd>
+                  {d.bts.map((b) => <span class="fiche__bloc"><span class="mono">{b}</span> {BTS_BLOCS[b as BtsBloc].label}</span>)}
+                </dd>
+              </div>
+            )}
+            {d.documents.length > 0 && (
+              <div>
+                <dt>Documents</dt>
+                <dd>
+                  <ul class="fiche__docs" role="list">
+                    {d.documents.map((doc) => (
+                      <li><a class="link" href={doc.href} target="_blank" rel="noopener">{doc.label}</a> <span class="meta">({doc.type})</span></li>
+                    ))}
+                  </ul>
+                </dd>
+              </div>
+            )}
+          </dl>
 
           {toc.length > 0 && (
             <nav class="toc" aria-label="Sommaire de la fiche" data-toc>
-              <p class="label">Sommaire</p>
+              <p class="kicker">Sommaire</p>
               <ol role="list">
-                {toc.map((h, i) => (
-                  <li><a href={`#${h.slug}`} data-toc-link><span class="label">{String(i + 1).padStart(2, '0')}</span> {h.text}</a></li>
-                ))}
+                {toc.map((h) => <li><a href={`#${h.slug}`} data-toc-link>{h.text}</a></li>)}
               </ol>
             </nav>
           )}
 
           {import.meta.env.DEV && !d.publicSafe && (
-            <p class="fiche__safety label">
-              <span class="todo">DEV</span> fiche non marquée <code>publicSafe: true</code> — relire CONTENT-SAFETY.md avant publication.
-            </p>
+            <p class="meta"><span class="todo">DEV</span> fiche non marquée <code>publicSafe: true</code> — relire CONTENT-SAFETY.md avant publication.</p>
           )}
         </div>
       </aside>
@@ -197,22 +145,14 @@ const jsonLd = {
 
         {d.images.length > 0 && (
           <section class="fiche__gallery" aria-labelledby="gal-title">
-            <h2 id="gal-title" class="fiche__gallery-title"><span class="label">Captures & schémas</span></h2>
-            <ul class="fgrid" role="list" data-lightbox-group>
-              {d.images.map((img, i) => (
+            <h2 id="gal-title">Captures et schémas</h2>
+            <ul class="fgrid" role="list">
+              {d.images.map((img) => (
                 <li>
-                  <a
-                    href={img.src.src}
-                    class="fgrid__item"
-                    data-lightbox
-                    data-caption={img.caption ?? img.alt}
-                    data-index={i}
-                    aria-label={`Agrandir : ${img.alt}`}
-                  >
+                  <a href={img.src.src} class="fgrid__item" data-lightbox data-caption={img.caption ?? img.alt} aria-label={`Agrandir : ${img.alt}`}>
                     <Image src={img.src} alt={img.alt} width={800} widths={[480, 800]} sizes="(min-width: 900px) 40vw, 100vw" loading="lazy" />
-                    <span class="fgrid__zoom" aria-hidden="true"><Icon name="maximize" size={16} /></span>
                   </a>
-                  {img.caption && <p class="fgrid__caption">{img.caption}</p>}
+                  {img.caption && <p class="meta">{img.caption}</p>}
                 </li>
               ))}
             </ul>
@@ -221,38 +161,36 @@ const jsonLd = {
       </div>
     </div>
 
-    <!-- ======= Navigation entre fiches ======= -->
     <nav class="container fiche__nav" aria-label="Fiches voisines">
       {prev ? (
         <a href={`/travaux/${prev.id}`} class="fiche__nav-link" data-nav-prev rel="prev">
-          <span class="label"><Icon name="arrow-left" size={12} /> Précédente</span>
-          <span class="fiche__nav-title">{prev.data.title}</span>
+          <span class="meta">← Fiche précédente</span>
+          <span>{prev.data.title}</span>
         </a>
       ) : <span />}
-      <a href="/travaux" class="fiche__nav-all label"><Icon name="grid" size={14} /> Toutes les fiches</a>
       {next ? (
         <a href={`/travaux/${next.id}`} class="fiche__nav-link fiche__nav-link--next" data-nav-next rel="next">
-          <span class="label">Suivante <Icon name="arrow-right" size={12} /></span>
-          <span class="fiche__nav-title">{next.data.title}</span>
+          <span class="meta">Fiche suivante →</span>
+          <span>{next.data.title}</span>
         </a>
       ) : <span />}
     </nav>
 
-    <!-- ======= Barre du mode présentation ======= -->
+    <!-- Barre du mode présentation -->
     <div class="pbar" data-presentation-bar hidden>
       <div class="pbar__inner">
-        <span class="pbar__ref label label--ink">{ref}</span>
-        <span class="pbar__pos label"><span data-presentation-section>—</span></span>
-        <div class="pbar__controls">
-          <button type="button" class="pbar__btn" data-presentation-section-prev aria-label="Section précédente (↑)"><Icon name="chevron-left" size={18} /></button>
-          <button type="button" class="pbar__btn" data-presentation-section-next aria-label="Section suivante (↓ ou espace)"><Icon name="chevron-right" size={18} /></button>
-        </div>
-        <span class="pbar__fiche label">Fiche {position}/{order.length}</span>
-        <div class="pbar__controls">
-          {prev && <a href={`/travaux/${prev.id}`} class="pbar__btn" aria-label="Fiche précédente (←)"><Icon name="arrow-left" size={18} /></a>}
-          {next && <a href={`/travaux/${next.id}`} class="pbar__btn" aria-label="Fiche suivante (→)"><Icon name="arrow-right" size={18} /></a>}
-        </div>
-        <button type="button" class="pbar__btn pbar__exit" data-presentation-exit aria-label="Quitter le mode présentation (Échap)"><Icon name="x" size={18} /> <span>Quitter</span></button>
+        <span class="mono pbar__ref">{ref}</span>
+        <span class="pbar__pos meta"><span data-presentation-section>—</span></span>
+        <span class="pbar__group">
+          <button type="button" class="pbar__btn" data-presentation-section-prev aria-label="Section précédente (↑)"><Icon name="chevron-left" size={16} /></button>
+          <button type="button" class="pbar__btn" data-presentation-section-next aria-label="Section suivante (↓ ou espace)"><Icon name="chevron-right" size={16} /></button>
+        </span>
+        <span class="meta pbar__fiche">Fiche {position}/{order.length}</span>
+        <span class="pbar__group">
+          {prev && <a href={`/travaux/${prev.id}`} class="pbar__btn" aria-label="Fiche précédente (←)"><Icon name="arrow-left" size={16} /></a>}
+          {next && <a href={`/travaux/${next.id}`} class="pbar__btn" aria-label="Fiche suivante (→)"><Icon name="arrow-right" size={16} /></a>}
+        </span>
+        <button type="button" class="pbar__btn pbar__exit" data-presentation-exit aria-label="Quitter le mode présentation (Échap)"><Icon name="x" size={16} /> <span>Quitter</span></button>
       </div>
     </div>
   </article>
@@ -272,113 +210,72 @@ const jsonLd = {
 </Base>
 
 <style>
-  .fiche__head { padding-block: clamp(2.5rem, 6vw, 4.5rem) clamp(2rem, 4vw, 3rem); border-bottom: 1px solid var(--line); }
-  .fiche__crumb { display: flex; flex-wrap: wrap; gap: 0.6rem; margin-bottom: var(--space-5); }
-  .fiche__crumb a:hover { color: var(--accent); }
-  .fiche__tags { margin-bottom: var(--space-4); }
-  .fiche__title { font-size: var(--text-3xl); max-width: 22ch; font-variation-settings: 'opsz' 96; }
-  .fiche__summary { margin-top: var(--space-4); max-width: 60ch; font-size: var(--text-lg); color: var(--ink-2); line-height: 1.5; }
-  .fiche__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: var(--space-6); }
+  .fiche__head { padding-block: var(--s-7) var(--s-6); border-bottom: 1px solid var(--line); }
+  .fiche__crumb { margin-bottom: var(--s-4); }
+  .fiche__crumb a:hover { color: var(--accent); text-decoration: underline; }
+  .fiche__title { font-size: var(--text-2xl); max-width: 28ch; }
+  .fiche__summary { margin-top: var(--s-3); max-width: var(--measure); font-size: var(--text-md); color: var(--ink-2); }
+  .fiche__actions { display: flex; flex-wrap: wrap; gap: 0.5rem; margin-top: var(--s-5); }
 
-  .fiche__cover { padding-top: var(--space-6); }
-  .fiche__cover :global(img) { width: 100%; height: auto; border-radius: var(--radius-lg); border: 1px solid var(--line); }
+  .fiche__cover { padding-top: var(--s-6); }
+  .fiche__cover :global(img) { width: 100%; height: auto; border: 1px solid var(--line); border-radius: var(--radius); }
 
-  .fiche__body { display: grid; gap: var(--space-7); padding-block: var(--space-7) var(--space-8); align-items: start; }
-  @media (min-width: 1024px) {
-    .fiche__body { grid-template-columns: 300px minmax(0, 1fr); gap: var(--space-8); }
-    .fiche__side { order: 0; }
-    .fiche__sticky { position: sticky; top: calc(var(--header-h) + 1.5rem); }
+  .fiche__body { display: grid; gap: var(--s-6); padding-block: var(--s-6) var(--s-7); align-items: start; }
+  @media (min-width: 900px) {
+    .fiche__body { grid-template-columns: 260px minmax(0, 1fr); gap: var(--s-8); }
+    .fiche__sticky { position: sticky; top: calc(var(--header-h) + 1.25rem); }
   }
-  .fiche__sticky { display: flex; flex-direction: column; gap: var(--space-5); }
-  .fiche__meta { margin: 0; display: grid; gap: 0; border-top: 1px solid var(--line-strong); }
-  .fiche__meta div { padding: 0.7rem 0; border-bottom: 1px solid var(--line); display: grid; gap: 0.2rem; }
-  .fiche__meta dd { margin: 0; font-size: var(--text-sm); color: var(--ink); }
-  .fiche__meta dd.is-todo { color: var(--ink-3); }
-  .fiche__block .label { display: block; margin-bottom: 0.6rem; }
-  .fiche__todo { font-size: var(--text-sm); color: var(--ink-3); }
-  .fiche__skills { display: flex; flex-direction: column; gap: 0.3rem; font-size: var(--text-sm); color: var(--ink-2); }
-  .fiche__skills li { padding-left: 1rem; position: relative; }
-  .fiche__skills li::before { content: ''; position: absolute; left: 0; top: 0.65em; width: 6px; height: 1px; background: var(--accent); }
-  .fiche__bts { display: flex; flex-direction: column; gap: 0.4rem; font-size: var(--text-sm); color: var(--ink-2); }
-  .fiche__bts .label { display: inline; margin: 0 0.3rem 0 0; }
-  .fiche__docs { display: flex; flex-direction: column; gap: 0.4rem; }
-  .fiche__docs li { display: flex; align-items: center; gap: 0.5rem; font-size: var(--text-sm); }
-  .fiche__docs li > a:first-child { display: inline-flex; align-items: center; gap: 0.4rem; flex: 1; color: var(--ink); }
-  .fiche__docs li > a:first-child:hover { color: var(--accent); }
-  .fiche__dl { color: var(--ink-3); }
-  .fiche__dl:hover { color: var(--accent); }
-  .fiche__safety { text-transform: none; letter-spacing: 0.02em; }
+  .fiche__sticky { display: flex; flex-direction: column; gap: var(--s-5); }
 
-  .toc .label { display: block; margin-bottom: 0.6rem; }
+  .facts { margin: 0; border-top: 1px solid var(--line); }
+  .facts div { padding: 0.6rem 0; border-bottom: 1px solid var(--line); }
+  .facts dt { font-size: var(--text-xs); font-weight: 500; color: var(--ink-3); margin-bottom: 0.15rem; }
+  .facts dd { margin: 0; font-size: var(--text-sm); line-height: 1.5; }
+  .fiche__bloc { display: block; }
+  .fiche__bloc .mono { color: var(--accent); margin-right: 0.3rem; }
+  .fiche__docs li + li { margin-top: 0.2rem; }
+
   .toc ol { display: flex; flex-direction: column; border-left: 1px solid var(--line); }
-  .toc a { display: flex; gap: 0.6rem; align-items: baseline; padding: 0.35rem 0 0.35rem 0.9rem; font-size: var(--text-sm); color: var(--ink-2); margin-left: -1px; border-left: 1px solid transparent; transition: color var(--dur-fast), border-color var(--dur-fast); }
+  .toc a { display: block; padding: 0.25rem 0 0.25rem 0.75rem; margin-left: -1px; border-left: 1px solid transparent; font-size: var(--text-sm); color: var(--ink-2); }
   .toc a:hover { color: var(--ink); }
   .toc a.is-active { color: var(--accent); border-left-color: var(--accent); }
-  .toc a.is-active .label { color: var(--accent); }
 
   .fiche__main { min-width: 0; }
-  .fiche__main .prose { max-width: 72ch; counter-reset: sec; }
-  .fiche__main :global(.prose h2::before) {
-    counter-increment: sec;
-    content: counter(sec, decimal-leading-zero);
-    font-family: var(--font-mono); font-size: var(--text-xs); color: var(--accent); letter-spacing: 0.08em; font-weight: 500;
-  }
+  .fiche__gallery { margin-top: var(--s-7); padding-top: var(--s-5); border-top: 1px solid var(--line); }
+  .fiche__gallery h2 { font-size: var(--text-lg); margin-bottom: var(--s-4); }
+  .fgrid { display: grid; gap: var(--s-4); grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); }
+  .fgrid__item { display: block; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--bg-2); }
+  .fgrid__item:hover { border-color: var(--line-strong); }
+  .fgrid li p { margin-top: 0.4rem; }
 
-  .fiche__gallery { margin-top: var(--space-8); padding-top: var(--space-6); border-top: 1px solid var(--line); }
-  .fiche__gallery-title { margin-bottom: var(--space-4); }
-  .fgrid { display: grid; gap: var(--space-4); grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
-  .fgrid__item { position: relative; display: block; border: 1px solid var(--line); border-radius: var(--radius-lg); overflow: hidden; background: var(--paper-2); }
-  .fgrid__item :global(img) { width: 100%; height: auto; transition: transform 800ms var(--ease-out); }
-  .fgrid__item:hover :global(img) { transform: scale(1.03); }
-  .fgrid__zoom { position: absolute; right: 0.6rem; bottom: 0.6rem; display: inline-flex; padding: 0.4rem; background: var(--paper-elev); border: 1px solid var(--line); border-radius: var(--radius); color: var(--ink-2); opacity: 0; transition: opacity var(--dur-fast); }
-  .fgrid__item:hover .fgrid__zoom, .fgrid__item:focus-visible .fgrid__zoom { opacity: 1; }
-  .fgrid__caption { margin-top: 0.5rem; font-size: var(--text-sm); color: var(--ink-3); }
-
-  .fiche__nav { display: grid; grid-template-columns: 1fr auto 1fr; gap: var(--space-4); align-items: center; padding-block: var(--space-6); border-top: 1px solid var(--line-strong); }
-  .fiche__nav-link { display: flex; flex-direction: column; gap: 0.3rem; min-width: 0; }
+  .fiche__nav { display: grid; grid-template-columns: 1fr 1fr; gap: var(--s-4); padding-block: var(--s-5); border-top: 1px solid var(--line); }
+  .fiche__nav-link { display: flex; flex-direction: column; gap: 0.2rem; font-weight: 500; }
+  .fiche__nav-link:hover > span:last-child { color: var(--accent); text-decoration: underline; }
   .fiche__nav-link--next { text-align: right; align-items: flex-end; }
-  .fiche__nav-link .label { display: inline-flex; align-items: center; gap: 0.3rem; }
-  .fiche__nav-title { font-family: var(--font-display); font-size: var(--text-lg); line-height: 1.2; transition: color var(--dur-fast); }
-  .fiche__nav-link:hover .fiche__nav-title { color: var(--accent); }
-  .fiche__nav-all { display: inline-flex; align-items: center; gap: 0.4rem; }
-  .fiche__nav-all:hover { color: var(--accent); }
-  @media (max-width: 640px) {
-    .fiche__nav { grid-template-columns: 1fr; }
-    .fiche__nav-link--next { text-align: left; align-items: flex-start; }
-    .fiche__nav-all { order: 3; }
-  }
+  @media (max-width: 560px) { .fiche__nav { grid-template-columns: 1fr; } .fiche__nav-link--next { text-align: left; align-items: flex-start; } }
 
-  /* ---------- Mode présentation ---------- */
+  /* Mode présentation */
   .pbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 150; padding: 0 var(--gutter) max(0.75rem, env(safe-area-inset-bottom)); pointer-events: none; }
-  .pbar[hidden] { display: none; }
   .pbar__inner {
-    pointer-events: auto;
-    margin-inline: auto; max-width: 900px;
-    display: flex; align-items: center; gap: 0.75rem; flex-wrap: wrap;
-    padding: 0.5rem 0.75rem;
-    background: color-mix(in srgb, var(--paper-elev) 92%, transparent);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--line-strong);
-    border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-lg);
-    animation: fade-up 400ms var(--ease-out);
+    pointer-events: auto; margin-inline: auto; max-width: 760px;
+    display: flex; align-items: center; gap: 0.6rem; flex-wrap: wrap;
+    padding: 0.4rem 0.6rem; background: var(--bg); border: 1px solid var(--line-strong); border-radius: var(--radius);
+    box-shadow: 0 6px 24px -12px rgb(0 0 0 / 0.35);
   }
-  .pbar__pos { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; text-transform: none; letter-spacing: 0.02em; }
-  .pbar__controls { display: flex; gap: 0.25rem; }
-  .pbar__btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; min-width: 2.25rem; height: 2.25rem; padding: 0 0.5rem; border-radius: var(--radius); color: var(--ink-2); font-family: var(--font-mono); font-size: var(--text-xs); transition: background var(--dur-fast), color var(--dur-fast); }
-  .pbar__btn:hover { background: var(--paper-2); color: var(--ink); }
+  .pbar__pos { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .pbar__group { display: flex; gap: 0.1rem; }
+  .pbar__btn { display: inline-flex; align-items: center; justify-content: center; gap: 0.3rem; min-width: 2rem; height: 2rem; padding: 0 0.4rem; border-radius: var(--radius); color: var(--ink-2); font-size: var(--text-xs); }
+  .pbar__btn:hover { background: var(--bg-2); color: var(--ink); }
   .pbar__exit { border: 1px solid var(--line); }
   @media (max-width: 640px) { .pbar__ref, .pbar__fiche { display: none; } .pbar__exit span { display: none; } }
 
-  :global(body[data-presenting]) .fiche__head { padding-top: clamp(1.5rem, 4vw, 3rem); }
-  :global(body[data-presenting]) .fiche__title { font-size: var(--text-3xl); }
-  :global(body[data-presenting]) .fiche__main .prose { font-size: var(--text-lg); max-width: 76ch; }
-  :global(body[data-presenting]) .fiche__main .prose h2 { font-size: var(--text-2xl); scroll-margin-top: 3rem; }
+  :global(body[data-presenting]) .fiche__main .prose { font-size: var(--text-lg); max-width: 74ch; }
+  :global(body[data-presenting]) .fiche__main .prose h2 { font-size: var(--text-xl); scroll-margin-top: 2.5rem; }
   :global(body[data-presenting]) .fiche__main .prose h2.is-current { color: var(--accent); }
   :global(body[data-presenting]) .fiche__nav,
   :global(body[data-presenting]) .fiche__crumb,
   :global(body[data-presenting]) [data-presentation-start] { display: none; }
-  :global(body[data-presenting]) { padding-bottom: 5rem; }
+  :global(body[data-presenting]) { padding-bottom: 4.5rem; }
   :global(body[data-presenting] #site-header),
   :global(body[data-presenting] .footer) { display: none; }
 </style>

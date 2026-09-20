@@ -11,25 +11,14 @@ interface Props {
   description: string;
   /** Image Open Graph (URL absolue ou chemin public). */
   image?: string;
-  /** Type de page pour Open Graph. */
   type?: 'website' | 'article';
-  /** Masquer le header/footer (mode présentation). */
-  bare?: boolean;
   /** Ne pas indexer cette page. */
   noindex?: boolean;
   /** Données structurées additionnelles (JSON-LD). */
   jsonLd?: Record<string, unknown>;
 }
 
-const {
-  title,
-  description,
-  image = '/og-default.png',
-  type = 'website',
-  bare = false,
-  noindex = false,
-  jsonLd,
-} = Astro.props;
+const { title, description, image = '/og-default.png', type = 'website', noindex = false, jsonLd } = Astro.props;
 
 const site = Astro.site ?? new URL('https://example.com');
 const canonical = new URL(Astro.url.pathname, site);
@@ -49,7 +38,7 @@ const personLd = {
 ---
 
 <!doctype html>
-<html lang="fr" class="no-js">
+<html lang="fr">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -59,8 +48,8 @@ const personLd = {
     {noindex && <meta name="robots" content="noindex, nofollow" />}
     <meta name="generator" content={Astro.generator} />
     <meta name="color-scheme" content="light dark" />
-    <meta name="theme-color" content="#f5f2ec" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#0f1116" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbfaf8" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#131412" media="(prefers-color-scheme: dark)" />
 
     <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
     <link rel="icon" href="/favicon.ico" sizes="32x32" />
@@ -80,7 +69,6 @@ const personLd = {
     <meta name="twitter:description" content={description} />
     <meta name="twitter:image" content={ogImage} />
 
-    <Font cssVariable="--font-display" preload />
     <Font cssVariable="--font-sans" preload />
     <Font cssVariable="--font-mono" />
 
@@ -89,28 +77,22 @@ const personLd = {
     {/* Thème : appliqué avant le premier rendu pour éviter tout flash. */}
     <script is:inline>
       (function () {
-        var d = document.documentElement;
-        d.classList.remove('no-js');
         try {
           var t = localStorage.getItem('theme');
-          if (t === 'dark' || t === 'light') d.setAttribute('data-theme', t);
+          if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
         } catch (e) {}
       })();
     </script>
 
     <ClientRouter fallback="swap" />
   </head>
-  <body data-bare={bare ? '' : undefined}>
+  <body>
     <a class="skip-link" href="#contenu">Aller au contenu</a>
-    <div class="guides" aria-hidden="true"><span></span><span></span><span></span><span></span><span></span></div>
-    <div class="progress" aria-hidden="true"><span id="progress-bar"></span></div>
-
-    {!bare && <Header />}
+    <Header />
     <main id="contenu" tabindex="-1">
       <slot />
     </main>
-    {!bare && <Footer />}
-
+    <Footer />
     <script>
       import '@/scripts/main';
     </script>
@@ -118,20 +100,5 @@ const personLd = {
 </html>
 
 <style is:global>
-  .progress {
-    position: fixed;
-    top: 0; left: 0; right: 0;
-    height: 2px;
-    z-index: 200;
-    pointer-events: none;
-  }
-  .progress span {
-    display: block;
-    height: 100%;
-    width: 100%;
-    background: var(--accent);
-    transform: scaleX(var(--progress, 0));
-    transform-origin: left;
-  }
   main:focus { outline: none; }
 </style>

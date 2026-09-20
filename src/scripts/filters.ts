@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Filtres et recherche de la bibliothèque de travaux.
  * - Tout est calculé côté client sur les attributs data-* des cartes (aucune requête).
  * - L'état est reflété dans l'URL (?q=&kind=&cat=&tech=&year=&ctx=) : les filtres sont partageables.
@@ -66,7 +66,7 @@ export function initFilters() {
       if (f === 'kind') on = state.kind === v;
       if (f === 'category') on = state.category.has(v);
       if (f === 'tech') on = state.tech.has(v);
-      b.classList.toggle('chip--active', on);
+      b.classList.toggle('tag--active', on);
       b.setAttribute('aria-pressed', String(on));
     });
     selects.forEach((s) => {

@@ -1,31 +1,19 @@
 ---
 import Base from '@/layouts/Base.astro';
-import Icon from '@/components/Icon.astro';
 ---
 
 <Base title="Page introuvable" description="Cette page n’existe pas ou a été déplacée." noindex>
-  <section class="section nf">
-    <div class="container nf__inner">
-      <p class="label"><span class="mark"></span> HTTP 404 · Not Found</p>
-      <h1 class="nf__title">Cette page n’est pas <span class="em">dans le plan</span>.</h1>
-      <p class="nf__text">L’adresse est peut-être erronée, ou la fiche a été renommée. Les travaux sont tous référencés dans la bibliothèque.</p>
-      <div class="nf__actions">
-        <a href="/" class="btn"><Icon name="arrow-left" size={16} /> Retour à l’accueil</a>
-        <a href="/travaux" class="btn btn--secondary">Voir les travaux</a>
-      </div>
-      <pre class="nf__log" aria-hidden="true">HTTP/1.1 404 Not Found
-route lookup: no match in sitemap
-hint: try /travaux, /parcours, /competences</pre>
+  <section class="section">
+    <div class="container measure">
+      <p class="kicker">Erreur 404</p>
+      <h1>Page introuvable</h1>
+      <p class="nf__text">L’adresse est peut-être erronée, ou la fiche a été renommée. Tous les travaux sont référencés dans la bibliothèque.</p>
+      <p class="nf__links"><a class="link" href="/">Accueil</a> · <a class="link" href="/travaux">Travaux</a> · <a class="link" href="/parcours">Parcours</a></p>
     </div>
   </section>
 </Base>
 
 <style>
-  .nf { min-height: calc(100svh - var(--header-h) - 8rem); display: flex; align-items: center; }
-  .nf__inner { max-width: 60ch; }
-  .nf .label { display: inline-flex; align-items: center; gap: 0.6rem; margin-bottom: var(--space-4); }
-  .nf__title { font-size: var(--text-3xl); }
-  .nf__text { margin-top: var(--space-4); color: var(--ink-2); font-size: var(--text-lg); }
-  .nf__actions { display: flex; flex-wrap: wrap; gap: 0.75rem; margin-top: var(--space-6); }
-  .nf__log { margin-top: var(--space-7); padding: 1rem 1.25rem; font-size: var(--text-xs); color: var(--ink-3); background: var(--paper-2); border: 1px solid var(--line); border-radius: var(--radius-lg); overflow-x: auto; }
+  .nf__text { margin-top: var(--s-3); color: var(--ink-2); }
+  .nf__links { margin-top: var(--s-5); }
 </style>

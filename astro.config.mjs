@@ -33,26 +33,25 @@ export default defineConfig({
 
   /**
    * Polices auto-hébergées (fichiers lus dans node_modules, aucun appel externe au runtime).
-   * - Fraunces : titrage éditorial (serif variable, axe optique)
-   * - Instrument Sans : texte courant et interface
-   * - JetBrains Mono : étiquettes, références, métadonnées techniques
+   * - IBM Plex Sans : texte et titres (une seule famille, poids 400 à 600)
+   * - IBM Plex Mono : dates, références, métadonnées (usage limité)
    */
   fonts: [
     {
       provider: fontProviders.local(),
-      name: 'Fraunces',
-      cssVariable: '--font-display',
-      fallbacks: ['Georgia', 'Times New Roman', 'serif'],
+      name: 'IBM Plex Sans',
+      cssVariable: '--font-sans',
+      fallbacks: ['Segoe UI', 'Helvetica Neue', 'Arial', 'sans-serif'],
       options: {
         variants: [
           {
-            src: ['@fontsource-variable/fraunces/files/fraunces-latin-opsz-normal.woff2'],
-            weight: '100 900',
+            src: ['@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-normal.woff2'],
+            weight: '100 700',
             style: 'normal',
           },
           {
-            src: ['@fontsource-variable/fraunces/files/fraunces-latin-opsz-italic.woff2'],
-            weight: '100 900',
+            src: ['@fontsource-variable/ibm-plex-sans/files/ibm-plex-sans-latin-wght-italic.woff2'],
+            weight: '100 700',
             style: 'italic',
           },
         ],
@@ -60,31 +59,13 @@ export default defineConfig({
     },
     {
       provider: fontProviders.local(),
-      name: 'Instrument Sans',
-      cssVariable: '--font-sans',
-      fallbacks: ['Helvetica Neue', 'Arial', 'sans-serif'],
-      options: {
-        variants: [
-          {
-            src: ['@fontsource-variable/instrument-sans/files/instrument-sans-latin-wght-normal.woff2'],
-            weight: '400 700',
-            style: 'normal',
-          },
-        ],
-      },
-    },
-    {
-      provider: fontProviders.local(),
-      name: 'JetBrains Mono',
+      name: 'IBM Plex Mono',
       cssVariable: '--font-mono',
-      fallbacks: ['SFMono-Regular', 'Menlo', 'Consolas', 'monospace'],
+      fallbacks: ['Consolas', 'Menlo', 'monospace'],
       options: {
         variants: [
-          {
-            src: ['@fontsource-variable/jetbrains-mono/files/jetbrains-mono-latin-wght-normal.woff2'],
-            weight: '100 800',
-            style: 'normal',
-          },
+          { src: ['@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-400-normal.woff2'], weight: 400, style: 'normal' },
+          { src: ['@fontsource/ibm-plex-mono/files/ibm-plex-mono-latin-500-normal.woff2'], weight: 500, style: 'normal' },
         ],
       },
     },

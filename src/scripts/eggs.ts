@@ -16,9 +16,9 @@ export function initEasterEggs() {
   const hint = hex.match(/.{2}/g)?.map((h) => String.fromCharCode(parseInt(h, 16))).join('') ?? '';
   console.log(
     '%cHJ%c portfolio · statique · sans tracker\n%c' + hint + ' → /.well-known/security.txt',
-    'font-family:monospace;font-weight:700;background:#2438d9;color:#fff;padding:2px 6px;border-radius:3px',
-    'font-family:monospace;color:#6b7080;padding-left:6px',
-    'font-family:monospace;color:#2438d9',
+    'font-family:monospace;font-weight:700;background:#12694f;color:#fff;padding:2px 6px;border-radius:3px',
+    'font-family:monospace;color:#79776f;padding-left:6px',
+    'font-family:monospace;color:#12694f',
   );
 }
 
