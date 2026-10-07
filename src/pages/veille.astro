@@ -1,0 +1,720 @@
+---
+import { render } from 'astro:content';
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import { glossaire, totalTermes } from '@/data/glossaire';
+import { COUCHES, DISPOSITIF, REGLES_METHODE, type Couche } from '@/data/competences-e5';
+import {
+  getVeille,
+  getChiffres,
+  getEcarts,
+  getCorrectifsNonAppliques,
+  getRecurrents,
+  getDerniereMaj,
+  getPeriode,
+  moisLabel,
+  moisCourt,
+} from '@/lib/veille';
+
+const entrees = await getVeille();
+const chiffres = await getChiffres();
+const ecarts = await getEcarts();
+const nonAppliques = await getCorrectifsNonAppliques();
+const recurrents = await getRecurrents();
+const maj = await getDerniereMaj();
+const periode = await getPeriode();
+
+/* Le corps Markdown de chaque entrée est rendu à la compilation. */
+const rendus = await Promise.all(
+  entrees.map(async (entree) => ({ entree, Content: (await render(entree)).Content })),
+);
+
+/* Chronologie : la plus récente en premier, c'est l'ordre d'une veille. */
+const chronologie = [...rendus].reverse();
+
+const sommaire = [
+  { href: '#sujet', label: 'Le sujet' },
+  { href: '#dispositif', label: 'Dispositif' },
+  { href: '#vue-ensemble', label: 'Vue d’ensemble' },
+  { href: '#chronologie', label: 'Chronologie' },
+  { href: '#evolution', label: 'Évolution' },
+  { href: '#perspectives', label: 'Perspectives' },
+  { href: '#synthese', label: 'Synthèse' },
+  { href: '#glossaire', label: 'Glossaire' },
+];
+
+const coucheLabel = (c: string) => COUCHES[c as Couche]?.label ?? c;
+---
+
+<Base
+  title="Veille technologique — sécurité des accès distants et des équipements de bordure"
+  description={`Veille suivie de ${periode.toLowerCase()} sur la sécurité des accès distants : ${chiffres.cas} cas d’exploitation chez ${chiffres.editeurs} éditeurs, sources croisées et datées, du VPN au Zero Trust.`}
+  type="article"
+>
+  <section class="section">
+    <div class="container">
+      <div class="head" data-index="01 — Veille technologique">
+        <h1>La sécurité des accès distants et des équipements de bordure</h1>
+        <p>
+          Du VPN au Zero Trust. Veille suivie sur {chiffres.mois} mois, {periode.toLowerCase()}.
+        </p>
+        <p class="meta maj">
+          Dernière entrée : <time datetime={maj.iso}>{maj.label}</time> · mise à jour chaque mercredi, environ 20 minutes
+        </p>
+      </div>
+
+      {/* --- Chiffres clés, calculés depuis la collection --- */}
+      <ul class="chiffres" role="list">
+        <li><b>{chiffres.cas}</b><span>cas d’exploitation</span></li>
+        <li><b>{chiffres.editeurs}</b><span>éditeurs touchés</span></li>
+        <li><b>{chiffres.mois}</b><span>mois couverts</span></li>
+        <li><b>{chiffres.cve}</b><span>vulnérabilités suivies</span></li>
+        <li class="chiffres__fort">
+          <b>{chiffres.avantCorrectif}<span class="chiffres__sur">/{chiffres.cas}</span></b>
+          <span>exploités <strong>avant</strong> le correctif</span>
+        </li>
+      </ul>
+    </div>
+  </section>
+
+  <div class="layout container">
+    {/* --- Sommaire ancré, collant sur écran large --- */}
+    <nav class="toc" aria-label="Sommaire de la veille">
+      <p class="toc__title meta">Sommaire</p>
+      <ul role="list">
+        {sommaire.map((s) => <li><a href={s.href}>{s.label}</a></li>)}
+      </ul>
+      <a class="btn btn--secondary btn--sm toc__dl" href="/documents/Veille-Hamza-Jallabi.pdf" download>
+        <Icon name="download" /> Version PDF
+      </a>
+    </nav>
+
+    <div class="corps">
+      {/* ================= 1. LE SUJET ================= */}
+      <section id="sujet" class="bloc" aria-labelledby="sujet-t">
+        <h2 id="sujet-t">Le sujet</h2>
+        <div class="prose">
+          <p>
+            Une entreprise doit être joignable depuis Internet : ses salariés se connectent à distance, ses sites
+            communiquent entre eux. Elle installe donc à sa frontière des <strong>équipements de bordure</strong> —
+            pare-feu, concentrateurs VPN, passerelles d’accès.
+          </p>
+          <p>
+            Ces équipements sont visibles du monde entier, disposent d’un accès privilégié au réseau interne et sont
+            difficiles à arrêter pour être mis à jour. Dans son Panorama de la cybermenace 2024, l’ANSSI indique que
+            <strong>plus de la moitié de ses opérations de cyberdéfense</strong> — son plus haut niveau d’engagement en
+            réponse à incident — ont eu pour origine l’exploitation de vulnérabilités sur ces équipements. L’édition
+            2025 confirme que ces vulnérabilités peuvent être exploitées très vite après leur publication.
+          </p>
+        </div>
+
+        <ul class="sources sources--inline" role="list">
+          <li>
+            <span class="couche couche--reference">Référence</span>
+            <a href="https://cyber.gouv.fr/publications/panorama-de-la-cybermenace-2024" target="_blank" rel="noopener noreferrer">
+              ANSSI, <i>Panorama de la cybermenace 2024</i></a>
+            <span class="meta">mars 2025</span>
+          </li>
+          <li>
+            <span class="couche couche--reference">Référence</span>
+            <a href="https://www.cert.ssi.gouv.fr/cti/CERTFR-2026-CTI-002/" target="_blank" rel="noopener noreferrer">
+              ANSSI / CERT-FR, <i>Panorama de la cybermenace 2025</i> (CERTFR-2026-CTI-002)</a>
+            <span class="meta">11 mars 2026</span>
+          </li>
+        </ul>
+
+        <div class="duo">
+          <div>
+            <h3>Pourquoi ce sujet</h3>
+            <ul class="liste" role="list">
+              <li>Il recouvre ce que j’administre en SISR : VPN, pare-feu, règles de filtrage, certificats, annuaire.</li>
+              <li>
+                Il est d’actualité en continu : sur les {chiffres.mois} mois observés, aucun ne s’est écoulé sans une
+                vulnérabilité exploitée sur ce type d’équipement.
+              </li>
+              <li>Il rejoint mon projet professionnel, orienté vers la sécurité des infrastructures et du cloud.</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Le périmètre</h3>
+            <p class="perimetre">
+              <span class="perimetre__k perimetre__k--oui">Retenu</span>
+              les vulnérabilités activement exploitées qui touchent les pare-feu, les passerelles VPN et d’accès
+              distant, le SD-WAN et les serveurs qui pilotent l’accès distant, ainsi que les décisions des autorités
+              (ANSSI, CISA) sur ces équipements.
+            </p>
+            <p class="perimetre">
+              <span class="perimetre__k perimetre__k--non">Écarté</span>
+              ce qui ne concerne pas l’accès au réseau, même lorsque le CERT-FR en fait une alerte. Sur la période,
+              j’ai ainsi laissé de côté les alertes sur le ciblage des messageries instantanées (20 mars 2026),
+              WordPress (20 juillet 2026) et Metabase (10 septembre 2026).
+            </p>
+          </div>
+        </div>
+      </section>
+
+      {/* ================= 2. DISPOSITIF ================= */}
+      <section id="dispositif" class="bloc" aria-labelledby="dispositif-t">
+        <h2 id="dispositif-t">Dispositif de veille</h2>
+        <p class="prose">
+          Ma veille repose sur des sources classées par rôle, toutes suivies par flux RSS dans un agrégateur.
+        </p>
+
+        <div class="tableau">
+          <table>
+            <caption class="sr-only">Sources de la veille, classées par couche</caption>
+            <thead>
+              <tr><th scope="col">Couche</th><th scope="col">Source</th><th scope="col">Rôle</th></tr>
+            </thead>
+            <tbody>
+              {DISPOSITIF.map((d) => (
+                <tr>
+                  <td><span class={`couche couche--${d.couche}`}>{d.couche === 'agregation' ? 'Agrégation' : coucheLabel(d.couche)}</span></td>
+                  <td>{d.sources}</td>
+                  <td class="meta">{d.role}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
+        <h3>Trois règles de méthode</h3>
+        <ol class="regles" role="list">
+          {REGLES_METHODE.map((r) => (
+            <li><strong>{r.titre}</strong> {r.texte}</li>
+          ))}
+        </ol>
+        <p class="note meta">
+          La première règle est vérifiée par le site lui-même : une entrée dont toutes les sources appartiennent à la
+          même couche fait échouer la compilation.
+        </p>
+      </section>
+
+      {/* ================= 3. VUE D'ENSEMBLE ================= */}
+      <section id="vue-ensemble" class="bloc" aria-labelledby="vue-t">
+        <h2 id="vue-t">Vue d’ensemble</h2>
+        <div class="tableau">
+          <table>
+            <caption class="sr-only">Un mois par ligne, sur l’ensemble de la période</caption>
+            <thead>
+              <tr>
+                <th scope="col">Mois</th>
+                <th scope="col">Produit</th>
+                <th scope="col">Fait marquant</th>
+                <th scope="col">Exploitation</th>
+              </tr>
+            </thead>
+            <tbody>
+              {entrees.map((e) => {
+                const avant = e.data.cas.some((c) => c.exploitation === 'avant-correctif');
+                const apres = e.data.cas.some((c) => c.exploitation === 'apres-correctif');
+                return (
+                  <tr>
+                    <th scope="row" class="mono">{moisCourt(e.data.mois)}</th>
+                    <td>{[...new Set(e.data.cas.map((c) => c.produit))].join(', ')}</td>
+                    <td>{e.data.faitMarquant}</td>
+                    <td>
+                      <span class={`expl ${avant && apres ? 'expl--mixte' : avant ? 'expl--avant' : 'expl--apres'}`}>
+                        {avant && apres ? 'Avant et après correctif' : avant ? 'Avant correctif' : 'Après correctif'}
+                      </span>
+                    </td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      {/* ================= 4. CHRONOLOGIE ================= */}
+      <section id="chronologie" class="bloc" aria-labelledby="chrono-t">
+        <h2 id="chrono-t">Chronologie</h2>
+        <p class="prose">
+          Une entrée par mois, de la plus récente à la plus ancienne. Chaque source porte l’étiquette de sa couche ;
+          mon commentaire est signalé séparément.
+        </p>
+
+        <div class="mois">
+          {chronologie.map(({ entree, Content }, i) => (
+            <details class="mois__item" open={i === 0}>
+              <summary>
+                <span class="mois__date mono">{moisLabel(entree.data.mois)}</span>
+                <span class="mois__titre">{entree.data.titre}</span>
+                <span class="mois__chevron" aria-hidden="true"><Icon name="chevron-down" /></span>
+              </summary>
+
+              <div class="mois__corps">
+                <ul class="sources" role="list">
+                  {entree.data.sources.map((s) => (
+                    <li>
+                      <span class={`couche couche--${s.couche}`}>{coucheLabel(s.couche)}</span>
+                      <a href={s.url} target="_blank" rel="noopener noreferrer">
+                        {s.editeur}, <i>{s.titre}</i>
+                      </a>
+                      <span class="meta">{s.date}</span>
+                    </li>
+                  ))}
+                </ul>
+
+                {entree.data.cve.length > 0 && (
+                  <p class="cves mono">
+                    {entree.data.cve.map((c) => <span class="cve">{c}</span>)}
+                    {entree.data.cvss && <span class="cve cve--score">CVSS {entree.data.cvss}</span>}
+                  </p>
+                )}
+
+                <div class="prose mois__texte"><Content /></div>
+              </div>
+            </details>
+          ))}
+        </div>
+      </section>
+
+      {/* ================= 5. ÉVOLUTION ================= */}
+      <section id="evolution" class="bloc" aria-labelledby="evol-t">
+        <h2 id="evol-t">Évolution sur la période</h2>
+        <p class="prose">
+          En {chiffres.mois} mois, j’ai relevé <strong>{chiffres.cas} cas</strong> d’exploitation d’équipements d’accès
+          distant, chez <strong>{chiffres.editeurs} éditeurs</strong>. Quatre constats s’en dégagent.
+        </p>
+
+        <h3>1. L’attaque précède le plus souvent le correctif</h3>
+        <p class="prose">
+          Dans <strong>{chiffres.avantCorrectif} cas sur {chiffres.cas}</strong>, la faille était exploitée avant la
+          publication du correctif ou au moment de celle-ci. Le modèle classique « un correctif paraît, je l’applique à
+          la prochaine fenêtre de maintenance » ne tient plus pour les équipements exposés. Lorsque la date de première
+          exploitation est connue, l’écart est le suivant :
+        </p>
+        <div class="tableau">
+          <table>
+            <caption class="sr-only">Écart entre la première exploitation connue et le correctif</caption>
+            <thead>
+              <tr>
+                <th scope="col">Cas</th>
+                <th scope="col">Première exploitation connue</th>
+                <th scope="col">Divulgation et correctif</th>
+                <th scope="col">Écart</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ecarts.map((c) => (
+                <tr>
+                  <th scope="row">{c.produit}</th>
+                  <td>{c.premiereExploitation}</td>
+                  <td>{c.divulgation}</td>
+                  <td class="fort">{c.ecart}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="prose">
+          Ces écarts vont de quelques jours à plusieurs années et ce sont des minimums, puisqu’ils reposent sur la
+          première trace retrouvée. Je n’y vois pas de tendance à la baisse. Conclusion opérationnelle : on ne peut pas
+          fonder sa défense sur la seule réactivité aux alertes. Il faut supposer la compromission possible et
+          segmenter en conséquence.
+        </p>
+
+        <h3>2. Un correctif disponible ne protège que s’il est appliqué</h3>
+        <p class="prose">
+          Les <strong>{nonAppliques.length} autres cas</strong> sont l’inverse : le correctif existait, mais il n’avait
+          pas été appliqué ou pas jugé prioritaire.
+        </p>
+        <div class="tableau">
+          <table>
+            <caption class="sr-only">Cas où le correctif existait déjà</caption>
+            <thead>
+              <tr>
+                <th scope="col">Faille</th>
+                <th scope="col">Correctif</th>
+                <th scope="col">Exploitation</th>
+                <th scope="col">Ce qui a manqué</th>
+              </tr>
+            </thead>
+            <tbody>
+              {nonAppliques.map((c) => (
+                <tr>
+                  <th scope="row">{c.produit}</th>
+                  <td>{c.correctif}</td>
+                  <td>{c.exploitationConstatee}</td>
+                  <td class="fort">{c.manque}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+        <p class="prose">
+          Dans deux cas sur quatre, c’est l’évaluation initiale de la gravité qui a trompé. Pour un équipement de
+          bordure, la question à se poser n’est pas « quel est le score ? » mais « l’équipement est-il exposé, et que
+          permet la faille ? ».
+        </p>
+
+        <h3>3. Les mêmes produits reviennent</h3>
+        <ul class="recurrents" role="list">
+          {recurrents.map((r) => (
+            <li>
+              <span class="recurrents__produit">{r.produit}</span>
+              <span class="recurrents__mois meta">{r.mois.join(' · ')}</span>
+              <span class="recurrents__n mono">×{r.mois.length}</span>
+            </li>
+          ))}
+        </ul>
+        <p class="prose">
+          {chiffres.editeurs} éditeurs différents, mais une seule fonction : le contrôle de l’accès distant. Ce n’est
+          pas un problème de marque, c’est un problème structurel de la fonction elle-même : un service exposé à tous,
+          qui traite des requêtes avant toute authentification et qui ouvre sur le réseau interne.
+        </p>
+
+        <h3>4. L’accès initial alimente l’extorsion</h3>
+        <p class="prose">
+          Les cas Check Point et Palo Alto le montrent : faille VPN → accès au réseau → rançongiciel Qilin. Check Point
+          estime d’ailleurs que le même acteur exploite des failles VPN chez plusieurs éditeurs. L’équipement de
+          bordure n’est pas la cible finale, c’est la porte d’entrée d’une chaîne qui se termine par le vol ou le
+          chiffrement des données.
+        </p>
+      </section>
+
+      {/* ================= 6. PERSPECTIVES ================= */}
+      <section id="perspectives" class="bloc" aria-labelledby="persp-t">
+        <h2 id="persp-t">Perspectives à moyen terme</h2>
+        <p class="prose">À horizon de deux à trois ans, trois évolutions me paraissent engagées.</p>
+
+        <h3>1. Le cycle de vie des équipements devient une obligation</h3>
+        <p class="prose">
+          La directive BOD 26-02 de la CISA (5 février 2026) fixe aux agences fédérales américaines un calendrier de
+          retrait des équipements de bordure qui ne reçoivent plus de mises à jour.
+        </p>
+        <div class="tableau">
+          <table>
+            <caption class="sr-only">Calendrier de la directive BOD 26-02</caption>
+            <thead><tr><th scope="col">Échéance</th><th scope="col">Obligation</th></tr></thead>
+            <tbody>
+              <tr><th scope="row" class="mono">5 mai 2026</th><td>Inventaire des équipements de bordure en fin de support</td></tr>
+              <tr><th scope="row" class="mono">5 février 2027</th><td>Retrait des équipements déjà en fin de support</td></tr>
+              <tr><th scope="row" class="mono">5 août 2027</th><td>Remplacement de tous les équipements identifiés</td></tr>
+              <tr><th scope="row" class="mono">5 février 2028</th><td>Processus permanent de découverte et d’inventaire</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <p class="prose">
+          Elle ne s’applique qu’à l’administration américaine, mais elle indique la direction : un inventaire tenu en
+          continu et un remplacement planifié, au lieu d’équipements conservés tant qu’ils fonctionnent.
+        </p>
+
+        <h3>2. Du VPN au Zero Trust : une transformation progressive, pas un remplacement</h3>
+        <ul class="sources sources--inline" role="list">
+          <li>
+            <span class="couche couche--reference">Référence</span>
+            <a href="https://cyber.gouv.fr/sites/default/files/document/anssi-fondamentaux-zero-trust-v1.0.pdf" target="_blank" rel="noopener noreferrer">
+              ANSSI, <i>Modèle Zero Trust – Les fondamentaux</i></a>
+            <span class="meta">juin 2025</span>
+          </li>
+        </ul>
+        <p class="prose">
+          Le modèle Zero Trust vise à réduire la confiance implicite : chaque accès est contrôlé de façon fine et
+          réévalué régulièrement, selon l’identité de l’utilisateur et l’état de son poste. L’ANSSI le présente comme
+          une composante de la défense en profondeur, à adopter de manière maîtrisée et progressive, et non comme un
+          remplacement de la défense périmétrique.
+        </p>
+        <div class="analyse">
+          <span class="couche couche--analyse">Mon analyse</span>
+          <p>
+            La chronologie montre pourquoi ce modèle progresse. Un VPN classique donne un accès large au réseau dès que
+            le tunnel est établi : c’est ce qui rend si graves les contournements d’authentification de Check Point ou
+            de Palo Alto. Le Zero Trust limite ce qu’une session permet, application par application, avec
+            authentification multifacteur et contrôle de posture. Mais il ne supprime pas l’exposition : les briques
+            sur lesquelles il repose sont elles-mêmes attaquées, comme le serveur de gestion des postes en avril ou le
+            traitement SAML en octobre. Changer de technologie ne dispense ni des correctifs ni de la segmentation.
+          </p>
+        </div>
+
+        <h3>3. Corriger ne suffit plus : il faut savoir chercher une compromission</h3>
+        <p class="prose">
+          Sur la période, la CISA a presque toujours fixé des délais de deux à trois jours (Ivanti, Cisco, Fortinet,
+          Palo Alto, Check Point, SonicWall, Citrix) là où la règle habituelle est de trois semaines. Et les éditeurs
+          demandent de plus en plus souvent autre chose qu’une mise à jour : rechercher des indicateurs de
+          compromission (F5), réinstaller le système et changer tous les secrets (SonicWall), renouveler des
+          certificats dont la clé a pu être copiée (Citrix). Comme ces équipements échappent aux outils de détection
+          des postes, leurs journaux, envoyés vers une plateforme externe, sont souvent la seule trace. Lire des
+          indicateurs, analyser des journaux et renouveler des secrets deviennent des compétences attendues d’un
+          administrateur, et plus seulement d’un spécialiste.
+        </p>
+      </section>
+
+      {/* ================= 7. SYNTHÈSE ================= */}
+      <section id="synthese" class="bloc" aria-labelledby="synth-t">
+        <h2 id="synth-t">Synthèse et apports</h2>
+        <p class="prose">
+          Sur {chiffres.mois} mois, les équipements chargés de protéger l’accès au réseau ont été attaqués chaque mois,
+          le plus souvent par des failles exploitées avant leur correctif et parfois pendant des semaines sans être
+          détectées. Une frontière seule ne suffit donc plus : il faut corriger en urgence, segmenter l’intérieur et
+          vérifier chaque accès.
+        </p>
+
+        <h3>Quatre conséquences pratiques pour un administrateur SISR</h3>
+        <ol class="consequences" role="list">
+          <li>
+            <strong>Inventorier l’exposition.</strong> Savoir précisément ce qui est joignable depuis Internet. On ne
+            protège pas ce qu’on ignore posséder.
+          </li>
+          <li>
+            <strong>Traiter les correctifs de bordure comme une procédure d’urgence distincte</strong>, avec un délai
+            cible en heures ou en jours, pas en semaines, et sans se fier au seul score de gravité.
+          </li>
+          <li>
+            <strong>Désactiver ce qui ne sert pas.</strong> Le cas Check Point tient entièrement à un protocole
+            déprécié resté actif.
+          </li>
+          <li>
+            <strong>Segmenter l’intérieur.</strong> Puisque la bordure finira par céder, il faut que la compromettre ne
+            donne pas accès à tout : VLAN, ACL, moindre privilège, flux d’annuaire chiffrés.
+          </li>
+        </ol>
+
+        <h3>Ce que cette veille m’a apporté</h3>
+        <ul class="liste" role="list">
+          <li>
+            Une méthode de recherche d’information : croiser une source officielle et une analyse technique, dater sur
+            la première version, distinguer le fait de son commentaire.
+          </li>
+          <li>Un approfondissement technique de notions du programme : IPsec et IKE, certificats, SAML, filtrage, journalisation.</li>
+          <li>
+            Un changement de pratique : quand je configure un pare-feu ou une ACL, je désactive ce qui ne sert pas et je
+            segmente en supposant que la bordure cédera.
+          </li>
+          <li>Une confirmation de mon projet professionnel, orienté vers la sécurité des infrastructures et du cloud.</li>
+        </ul>
+      </section>
+
+      {/* ================= 8. GLOSSAIRE ================= */}
+      <section id="glossaire" class="bloc" aria-labelledby="glo-t">
+        <h2 id="glo-t">Glossaire</h2>
+        <p class="prose">{totalTermes} termes, regroupés par thème.</p>
+
+        <div class="glossaire">
+          {glossaire.map((groupe) => (
+            <section class="glossaire__groupe" aria-labelledby={`glo-${groupe.id}`}>
+              <h3 id={`glo-${groupe.id}`}>{groupe.label}</h3>
+              <dl>
+                {groupe.termes.map((t) => (
+                  <div class="terme">
+                    <dt>{t.terme}</dt>
+                    <dd>{t.definition}</dd>
+                  </div>
+                ))}
+              </dl>
+            </section>
+          ))}
+        </div>
+      </section>
+    </div>
+  </div>
+</Base>
+
+<style>
+  /* ----- Chiffres clés ----- */
+  .maj { margin-top: var(--s-3); }
+
+  .chiffres {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  @media (min-width: 760px) { .chiffres { grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+  .chiffres li {
+    background: var(--bg);
+    padding: var(--s-4) var(--s-4) var(--s-5);
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+  .chiffres b {
+    font-family: var(--font-mono);
+    font-size: var(--text-2xl);
+    line-height: 1;
+    font-weight: 500;
+  }
+  .chiffres span { font-size: var(--text-sm); color: var(--ink-3); }
+  .chiffres__sur { font-size: var(--text-md); color: var(--ink-3); }
+  .chiffres__fort b { color: var(--accent); }
+  .chiffres__fort strong { color: var(--ink-2); font-weight: 600; }
+
+  /* ----- Mise en page : sommaire collant + corps ----- */
+  .layout { display: grid; gap: var(--s-6); align-items: start; padding-bottom: var(--s-8); }
+  @media (min-width: 1000px) {
+    .layout { grid-template-columns: 190px minmax(0, 1fr); gap: var(--s-8); }
+    .toc { position: sticky; top: calc(var(--header-h) + var(--s-5)); }
+  }
+
+  .toc__title { text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: var(--s-3); }
+  .toc ul { display: flex; flex-wrap: wrap; gap: 0.2rem 0.9rem; font-size: var(--text-sm); }
+  @media (min-width: 1000px) { .toc ul { display: block; } .toc li + li { margin-top: 0.45rem; } }
+  .toc a { color: var(--ink-3); transition: color var(--dur); }
+  .toc a:hover { color: var(--accent); }
+  .toc__dl { margin-top: var(--s-5); }
+
+  /* ----- Blocs ----- */
+  .bloc { scroll-margin-top: calc(var(--header-h) + 1rem); }
+  .bloc + .bloc { margin-top: var(--s-8); padding-top: var(--s-7); border-top: 1px solid var(--line); }
+  .bloc > h2 { font-size: var(--text-xl); margin-bottom: var(--s-4); }
+  .bloc h3 { font-size: var(--text-md); margin: var(--s-6) 0 var(--s-3); }
+  .bloc > .prose + h3 { margin-top: var(--s-6); }
+
+  .duo { display: grid; gap: var(--s-5); margin-top: var(--s-5); }
+  @media (min-width: 760px) { .duo { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-7); } }
+  .duo h3 { margin-top: 0; }
+
+  .liste, .regles, .consequences { color: var(--ink-2); font-size: var(--text-md); padding-left: 1.2em; }
+  .liste { list-style: disc; }
+  .regles, .consequences { list-style: decimal; }
+  .liste li + li, .regles li + li, .consequences li + li { margin-top: 0.5em; }
+  .regles strong, .consequences strong { color: var(--ink); }
+
+  .note { margin-top: var(--s-4); padding-left: 0.8rem; border-left: 2px solid var(--accent); }
+
+  .perimetre { color: var(--ink-2); font-size: var(--text-md); }
+  .perimetre + .perimetre { margin-top: var(--s-4); }
+  .perimetre__k {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    padding: 0.05rem 0.4rem;
+    margin-right: 0.4rem;
+    border: 1px solid currentColor;
+  }
+  .perimetre__k--oui { color: var(--accent); }
+  .perimetre__k--non { color: var(--ink-3); }
+
+  /* ----- Étiquettes de couche ----- */
+  .couche {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    line-height: 1.5;
+    padding: 0.08rem 0.4rem;
+    white-space: nowrap;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-3);
+  }
+  .couche--datation, .couche--datation-croisee { border-color: var(--accent); color: var(--accent); }
+  .couche--analyse-technique { border-color: var(--warn); color: var(--warn); }
+  .couche--reference { border-style: dashed; }
+  .couche--analyse { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+
+  /* ----- Sources ----- */
+  .sources { font-size: var(--text-sm); }
+  .sources li {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    gap: 0.2rem 0.55rem;
+    padding: 0.45rem 0;
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+  }
+  .sources li .meta { grid-column: 2; }
+  .sources a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-strong); }
+  .sources a:hover { color: var(--accent); text-decoration-color: currentColor; }
+  .sources--inline { margin-top: var(--s-4); border-top: 1px solid var(--line); }
+
+  /* ----- Tableaux ----- */
+  .tableau { overflow-x: auto; margin-top: var(--s-4); }
+  .tableau table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); min-width: 34rem; }
+  .tableau th, .tableau td {
+    text-align: left;
+    padding: 0.55em 0.7em 0.55em 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .tableau thead th {
+    font-weight: 500;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    border-bottom-color: var(--line-strong);
+  }
+  .tableau tbody th { font-weight: 600; color: var(--ink); }
+  .tableau td { color: var(--ink-2); }
+  .tableau .fort { color: var(--ink); font-weight: 600; }
+  .mono { font-family: var(--font-mono); font-size: 0.82em; }
+
+  .expl { white-space: nowrap; font-size: var(--text-xs); }
+  .expl--avant { color: var(--accent); }
+  .expl--apres { color: var(--ink-3); }
+  .expl--mixte { color: var(--warn); }
+
+  /* ----- Chronologie (accordéons natifs, sans JavaScript) ----- */
+  .mois { margin-top: var(--s-5); border-top: 1px solid var(--line-strong); }
+  .mois__item { border-bottom: 1px solid var(--line); }
+  .mois__item summary {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.15rem 1rem;
+    padding: var(--s-4) 0;
+    cursor: pointer;
+    list-style: none;
+    align-items: center;
+  }
+  @media (min-width: 680px) { .mois__item summary { grid-template-columns: 9.5rem minmax(0, 1fr) auto; } }
+  .mois__item summary::-webkit-details-marker { display: none; }
+  .mois__item summary:hover .mois__titre { color: var(--accent); }
+  .mois__date { color: var(--ink-3); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; }
+  .mois__titre { font-weight: 600; transition: color var(--dur); }
+  .mois__chevron { color: var(--ink-3); transition: transform var(--dur) var(--ease-out); }
+  .mois__item[open] .mois__chevron { transform: rotate(180deg); }
+  .mois__corps { padding-bottom: var(--s-6); }
+  .mois__texte { margin-top: var(--s-5); }
+  .mois__texte :global(h3) { font-size: var(--text-base); margin-top: 1.4em; }
+  .mois__texte :global(strong:first-child) { color: var(--ink); }
+
+  .cves { margin-top: var(--s-4); display: flex; flex-wrap: wrap; gap: 0.3rem; }
+  .cve {
+    font-size: var(--text-xs);
+    padding: 0.08rem 0.4rem;
+    border: 1px solid var(--line-strong);
+    color: var(--ink-3);
+  }
+  .cve--score { border-color: var(--warn); color: var(--warn); }
+
+  /* ----- Mon analyse (hors fichiers Markdown) ----- */
+  .analyse { margin-top: var(--s-5); padding-left: var(--s-4); border-left: 2px solid var(--accent); }
+  .analyse p { margin-top: var(--s-3); color: var(--ink-2); font-size: var(--text-md); max-width: var(--measure); }
+
+  /* ----- Produits récurrents ----- */
+  .recurrents { margin-top: var(--s-4); border-top: 1px solid var(--line); }
+  .recurrents li {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) auto;
+    gap: 0.1rem 1rem;
+    padding: 0.6rem 0;
+    border-bottom: 1px solid var(--line);
+    align-items: baseline;
+  }
+  @media (min-width: 680px) { .recurrents li { grid-template-columns: 13rem minmax(0, 1fr) auto; } }
+  .recurrents__produit { font-weight: 600; }
+  .recurrents__n { color: var(--accent); }
+
+  /* ----- Glossaire ----- */
+  .glossaire { margin-top: var(--s-4); display: grid; gap: var(--s-6); }
+  @media (min-width: 860px) { .glossaire { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s-6) var(--s-7); } }
+  .glossaire__groupe h3 { margin-top: 0; }
+  .terme { padding: 0.5rem 0; border-bottom: 1px solid var(--line); }
+  .terme dt { font-weight: 600; font-size: var(--text-sm); }
+  .terme dd { margin: 0.15rem 0 0; font-size: var(--text-sm); color: var(--ink-2); }
+
+  /* ----- Impression : tout déplié, liens visibles ----- */
+  @media print {
+    .toc { display: none; }
+    .mois__item { break-inside: avoid; }
+    .mois__chevron { display: none; }
+    .bloc { break-before: auto; }
+    .tableau { overflow: visible; }
+    .tableau table { min-width: 0; }
+  }
+</style>

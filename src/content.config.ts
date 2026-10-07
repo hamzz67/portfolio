@@ -14,6 +14,7 @@ import { defineCollection } from 'astro:content';
 import { glob } from 'astro/loaders';
 import { z } from 'astro/zod';
 import { kindKeys, categoryKeys, statusKeys, blocKeys } from './data/taxonomy';
+import { competenceKeys, coucheKeys } from './data/competences-e5';
 
 const projects = defineCollection({
   // Tous les .md du dossier, sauf ceux qui commencent par "_" (ex. _TEMPLATE.md)
@@ -93,4 +94,95 @@ const projects = defineCollection({
     }),
 });
 
-export const collections = { projects };
+/**
+ * VEILLE TECHNOLOGIQUE — un fichier Markdown par mois.
+ *
+ * Tout ce qui est affiché sous forme de tableau sur /veille/ est GÉNÉRÉ depuis
+ * ces fichiers : vue d'ensemble, chiffres clés, écart exploitation/correctif,
+ * cas où le correctif existait déjà. Ne jamais recopier un tableau à la main
+ * dans le corps d'une entrée : il divergerait du contenu en quelques semaines.
+ *
+ * Le corps du fichier contient les faits en liste, le paragraphe « Mon analyse »
+ * et la ligne « Lien avec le BTS SIO SISR ».
+ */
+
+/** Une source, étiquetée par sa couche dans le dispositif de veille. */
+const source = z.object({
+  couche: z.enum(coucheKeys as [string, ...string[]]),
+  /** Média ou organisme (ex. "CERT-FR", "Rapid7"). */
+  editeur: z.string().min(2),
+  titre: z.string().min(3),
+  /** Date de publication, en clair (ex. "19 décembre 2025"). */
+  date: z.string().min(4),
+  url: z.url(),
+});
+
+/**
+ * Un cas = un produit touché. Un mois peut en compter plusieurs
+ * (septembre 2026 : quatre éditeurs). C'est l'unité des statistiques.
+ */
+const cas = z.object({
+  produit: z.string().min(2),
+  editeur: z.string().min(2),
+  /** L'attaque a-t-elle précédé le correctif, ou le correctif existait-il déjà ? */
+  exploitation: z.enum(['avant-correctif', 'apres-correctif']),
+
+  /* --- Cas « avant correctif » : alimente le tableau des écarts --- */
+  /** Première exploitation connue, en clair ("7 mai 2026", "2023"). */
+  premiereExploitation: z.string().optional(),
+  /** Divulgation et correctif ("8 juin 2026"). */
+  divulgation: z.string().optional(),
+  /** Écart entre les deux, en clair ("32 jours", "Près de 3 ans"). */
+  ecart: z.string().optional(),
+
+  /* --- Cas « après correctif » : alimente le tableau des correctifs non appliqués --- */
+  /** Date de publication du correctif ("15 octobre 2025"). */
+  correctif: z.string().optional(),
+  /** Quand l'exploitation a été constatée ("Confirmée le 29 mars 2026"). */
+  exploitationConstatee: z.string().optional(),
+  /** Ce qui a manqué ("L'application du correctif", "La priorité", "Le temps"). */
+  manque: z.string().optional(),
+
+  /** Catalogue KEV de la CISA. */
+  kev: z
+    .object({
+      ajout: z.string(),
+      echeance: z.string().optional(),
+    })
+    .optional(),
+});
+
+const veille = defineCollection({
+  loader: glob({ pattern: '**/[^_]*.md', base: './src/content/veille' }),
+  schema: z
+    .object({
+      /** Clé de tri, format AAAA-MM. */
+      mois: z.string().regex(/^\d{4}-(0[1-9]|1[0-2])$/, 'Format attendu : AAAA-MM'),
+      /** Titre de l'entrée, sans le mois (il est ajouté à l'affichage). */
+      titre: z.string().min(5),
+      /** Colonne « Fait marquant » du tableau de vue d'ensemble. */
+      faitMarquant: z.string().min(5),
+      /** Identifiants CVE cités. */
+      cve: z.array(z.string().regex(/^CVE-\d{4}-\d{4,}$/)).default([]),
+      /** Score CVSS le plus élevé du mois (optionnel). */
+      cvss: z.number().min(0).max(10).optional(),
+      /** Produits touchés ce mois-ci. Au moins un. */
+      cas: z.array(cas).min(1),
+      /** Compétences E5 mobilisées (voir src/data/competences-e5.ts). */
+      competencesE5: z.array(z.enum(competenceKeys as [string, ...string[]])).default([]),
+      /** Sources, étiquetées par couche. */
+      sources: z.array(source).min(2),
+    })
+    /*
+     * RÈGLE DE MÉTHODE, APPLIQUÉE PAR LE BUILD : un fait ne vaut que croisé.
+     * Une entrée dont toutes les sources viennent de la même couche est refusée
+     * et `npm run build` s'arrête. C'est volontaire.
+     */
+    .refine((entry) => new Set(entry.sources.map((s) => s.couche)).size >= 2, {
+      message:
+        'Au moins deux sources de couches différentes sont exigées (règle de méthode : croiser la datation et l’explication ou l’analyse technique).',
+      path: ['sources'],
+    }),
+});
+
+export const collections = { projects, veille };

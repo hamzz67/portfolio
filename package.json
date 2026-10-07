@@ -11,7 +11,8 @@
     "preview": "astro preview",
     "check": "astro check",
     "icons": "node scripts/generate-icons.mjs",
-    "cv": "node scripts/generate-cv.mjs"
+    "cv": "node scripts/generate-cv.mjs",
+    "veille": "npm run build:only && node scripts/generate-veille-pdf.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

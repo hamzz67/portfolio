@@ -337,3 +337,68 @@ html.theme-vt::view-transition-new(root) {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* ==========================================================================
+   IMPRESSION
+   Les pages longues (veille, fiches de travaux) doivent sortir proprement sur
+   papier : c'est le PDF de secours à emporter le jour de l'épreuve, et c'est
+   aussi ce qui génère public/documents/Veille-Hamza-Jallabi.pdf (npm run veille).
+   ========================================================================== */
+@media print {
+  /* Chrome n'imprime pas les couleurs de fond par défaut : on repasse en
+     noir sur blanc plutôt que de compter dessus. */
+  :root {
+    --bg: #fff; --bg-2: #fff; --bg-3: #fff; --bg-elev: #fff;
+    --ink: #000; --ink-2: #1a1a1a; --ink-3: #444;
+    --line: #ccc; --line-strong: #888;
+    --accent: #0a4a38; --accent-ink: #fff;
+    --grain-opacity: 0;
+  }
+
+  html, body { background: #fff !important; }
+  body::before, body::after { display: none !important; }
+
+  /* Habillage du site : inutile sur papier. */
+  .header, .footer, .menu, .header__progress, canvas, .stamp, .lightbox { display: none !important; }
+
+  /* Rien ne doit rester masqué par une animation d'apparition. */
+  [data-reveal] { opacity: 1 !important; transform: none !important; }
+  * { animation: none !important; transition: none !important; }
+
+  .section { padding-block: 0 !important; border: 0 !important; }
+  .section + .section { border-top: 0 !important; }
+  .container { max-width: none; padding-inline: 0; }
+
+  /* Les accordéons natifs s'impriment dépliés : sans ça, le papier ne
+     contiendrait que les titres de mois.
+     `display` seul ne suffit pas — le navigateur masque le contenu d'un
+     <details> fermé via content-visibility, qu'il faut rouvrir explicitement,
+     sur le pseudo-élément ::details-content comme sur les enfants (navigateurs
+     plus anciens). Vérifié : sans ces règles, la veille s'imprime en 15 pages
+     au lieu de 33. */
+  details::details-content {
+    content-visibility: visible !important;
+    display: block !important;
+    block-size: auto !important;
+  }
+  details > *:not(summary) {
+    display: block !important;
+    content-visibility: visible !important;
+  }
+  details summary { list-style: none; }
+
+  h1, h2, h3 { break-after: avoid-page; }
+  table, figure, li { break-inside: avoid; }
+  thead { display: table-header-group; }
+
+  /* Un lien imprimé doit rester vérifiable : on écrit l'adresse à côté. */
+  a[href^="http"]::after {
+    content: " <" attr(href) ">";
+    font-size: 0.78em;
+    color: #555;
+    word-break: break-all;
+  }
+  .toc a[href^="http"]::after, .btn::after { content: ""; }
+
+  @page { margin: 14mm 13mm; }
+}

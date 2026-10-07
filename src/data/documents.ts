@@ -29,14 +29,16 @@ export interface PublicDocument {
 }
 
 export const documents: PublicDocument[] = [
-  // Exemple (à supprimer / remplacer) :
-  // {
-  //   title: 'Rapport de stage — Synerdys (version publique)',
-  //   href: '/documents/rapport-stage-synerdys-2026-public.pdf',
-  //   category: 'rapport',
-  //   description: 'Version anonymisée du rapport de stage de première année.',
-  //   date: '2026-07',
-  // },
+  {
+    title: 'Veille technologique — sécurité des accès distants',
+    href: '/documents/Veille-Hamza-Jallabi.pdf',
+    category: 'dossier',
+    // Fichier produit par `npm run veille` à partir de la page /veille/.
+    description:
+      'Onze mois de veille, de décembre 2025 à octobre 2026 : 15 cas d’exploitation chez 9 éditeurs, avec les sources croisées et datées. Version imprimable de la page Veille.',
+    date: '2026-10',
+    size: '483 Ko',
+  },
 ];
 
 export const documentCategories = {
