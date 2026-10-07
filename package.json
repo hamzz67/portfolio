@@ -12,7 +12,7 @@
     "check": "astro check",
     "icons": "node scripts/generate-icons.mjs",
     "cv": "node scripts/generate-cv.mjs",
-    "veille": "npm run build:only && node scripts/generate-veille-pdf.mjs"
+    "pdf": "npm run build:only && node scripts/generate-page-pdfs.mjs && npm run build:only"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

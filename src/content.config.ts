@@ -47,6 +47,13 @@ const projects = defineCollection({
       skills: z.array(z.string()).default([]),
       /** Blocs du référentiel BTS SIO mobilisés : B1, B2, B3. */
       bts: z.array(z.enum(blocKeys as [string, ...string[]])).default([]),
+      /**
+       * Compétences du bloc E5 couvertes par cette réalisation.
+       * Alimente le tableau de synthèse de /e5/ : une compétence sans aucune
+       * fiche y apparaît comme un trou à combler. Ne cocher que ce que la
+       * fiche prouve réellement — un tableau complaisant ne sert à rien.
+       */
+      competencesE5: z.array(z.enum(competenceKeys as [string, ...string[]])).default([]),
       /** Avancement. */
       status: z.enum(statusKeys as [string, ...string[]]).default('termine'),
       /** Mis en avant sur l'accueil et dans le mode présentation. */

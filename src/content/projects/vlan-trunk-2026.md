@@ -17,9 +17,10 @@ skills:
   - Configuration d’un commutateur (IOS)
   - Cloisonnement des flux
 bts: [B2]
+competencesE5: ['mettre-a-disposition', 'gerer-patrimoine']
 status: termine
-draft: true
-publicSafe: false
+draft: false
+publicSafe: true
 ---
 
 ## Contexte
@@ -62,4 +63,4 @@ Le revers, c’est que tout repose sur la configuration des commutateurs — d�
 
 **Gérer le patrimoine informatique.** Un découpage de ports identique sur tous les commutateurs, c’est une convention de configuration : elle rend le parc prévisible et documentable, au lieu de dépendre de la mémoire de celui qui a câblé.
 
-<!-- TODO (captures) : le rendu déposé est le fichier Packet Tracer (.pka), que je ne peux pas ouvrir. Captures à produire par Hamza : la topologie, `show vlan brief`, `show interfaces trunk`, le résultat du "Check Results", un ping qui passe dans un même VLAN entre deux commutateurs et un ping qui échoue entre deux VLAN. -->
+<!-- Captures et compléments à produire : voir CAPTURES-A-FAIRE.md à la racine. -->

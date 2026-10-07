@@ -87,6 +87,7 @@ const coucheLabel = (c: string) => COUCHES[c as Couche]?.label ?? c;
       <a class="btn btn--secondary btn--sm toc__dl" href="/documents/Veille-Hamza-Jallabi.pdf" download>
         <Icon name="download" /> Version PDF
       </a>
+      <p class="toc__rss meta"><a href="/veille.xml">Flux RSS</a> de cette veille</p>
     </nav>
 
     <div class="corps">
@@ -101,8 +102,8 @@ const coucheLabel = (c: string) => COUCHES[c as Couche]?.label ?? c;
           </p>
           <p>
             Ces équipements sont visibles du monde entier, disposent d’un accès privilégié au réseau interne et sont
-            difficiles à arrêter pour être mis à jour. Dans son Panorama de la cybermenace 2024, l’ANSSI indique que
-            <strong>plus de la moitié de ses opérations de cyberdéfense</strong> — son plus haut niveau d’engagement en
+            difficiles à arrêter pour être mis à jour. Dans son Panorama de la cybermenace 2024, l’ANSSI indique
+            que <strong>plus de la moitié de ses opérations de cyberdéfense</strong> — son plus haut niveau d’engagement en
             réponse à incident — ont eu pour origine l’exploitation de vulnérabilités sur ces équipements. L’édition
             2025 confirme que ces vulnérabilités peuvent être exploitées très vite après leur publication.
           </p>
@@ -554,6 +555,8 @@ const coucheLabel = (c: string) => COUCHES[c as Couche]?.label ?? c;
   .toc a { color: var(--ink-3); transition: color var(--dur); }
   .toc a:hover { color: var(--accent); }
   .toc__dl { margin-top: var(--s-5); }
+  .toc__rss { margin-top: var(--s-3); }
+  .toc__rss a { text-decoration: underline; text-decoration-color: var(--line-strong); }
 
   /* ----- Blocs ----- */
   .bloc { scroll-margin-top: calc(var(--header-h) + 1rem); }
@@ -652,16 +655,27 @@ const coucheLabel = (c: string) => COUCHES[c as Couche]?.label ?? c;
   /* ----- Chronologie (accordéons natifs, sans JavaScript) ----- */
   .mois { margin-top: var(--s-5); border-top: 1px solid var(--line-strong); }
   .mois__item { border-bottom: 1px solid var(--line); }
+  /* Sur écran étroit, la date passe au-dessus du titre et le chevron reste à
+     droite sur les deux lignes ; au-delà, les trois tiennent sur une ligne. */
   .mois__item summary {
     display: grid;
     grid-template-columns: minmax(0, 1fr) auto;
+    grid-template-areas: 'date chevron' 'titre chevron';
     gap: 0.15rem 1rem;
     padding: var(--s-4) 0;
     cursor: pointer;
     list-style: none;
     align-items: center;
   }
-  @media (min-width: 680px) { .mois__item summary { grid-template-columns: 9.5rem minmax(0, 1fr) auto; } }
+  .mois__date { grid-area: date; }
+  .mois__titre { grid-area: titre; }
+  .mois__chevron { grid-area: chevron; align-self: center; }
+  @media (min-width: 680px) {
+    .mois__item summary {
+      grid-template-columns: 9.5rem minmax(0, 1fr) auto;
+      grid-template-areas: 'date titre chevron';
+    }
+  }
   .mois__item summary::-webkit-details-marker { display: none; }
   .mois__item summary:hover .mois__titre { color: var(--accent); }
   .mois__date { color: var(--ink-3); font-size: var(--text-xs); text-transform: uppercase; letter-spacing: 0.06em; }

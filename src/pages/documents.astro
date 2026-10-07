@@ -76,6 +76,15 @@ const isPdf = (href: string) => href.toLowerCase().endsWith('.pdf');
         )}
       </div>
 
+      <aside class="e5" data-reveal>
+        <p class="kicker meta">Pour le jury</p>
+        <p>
+          La <a href="/e5">cartographie des compétences E5</a> met en regard chaque compétence du bloc
+          et les réalisations de ce portfolio qui la prouvent. Elle est générée depuis les fiches, et
+          signale les compétences qui restent à renforcer.
+        </p>
+      </aside>
+
       <aside class="policy meta" data-reveal>
         <p class="kicker">Politique de publication</p>
         <p>Aucun document ne contient d’adresse personnelle, de numéro de téléphone, d’identifiants, de mots de passe, de clés ou de données internes d’entreprise. Les captures d’écran sont anonymisées et les adresses IP remplacées par des plages d’exemple.</p>
@@ -90,6 +99,18 @@ const isPdf = (href: string) => href.toLowerCase().endsWith('.pdf');
   .doc { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s-4); align-items: start; }
   .doc__actions { display: flex; gap: var(--s-4); font-size: var(--text-sm); white-space: nowrap; padding-top: 0.15rem; }
   @media (max-width: 560px) { .doc { grid-template-columns: 1fr; } }
+  .e5 {
+    max-width: 36ch;
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+    padding: var(--s-4);
+    border: 1px solid var(--line-strong);
+    margin-bottom: var(--s-5);
+  }
+  .e5 .kicker { margin-bottom: 0.3rem; }
+  .e5 a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--accent); }
+  .e5 a:hover { color: var(--accent); }
+
   .policy { max-width: 36ch; }
   @media (min-width: 900px) { .policy { padding-top: 0.35rem; } }
 </style>

@@ -19,15 +19,16 @@ skills:
   - Audit de sécurité
   - Ligne de commande Linux
 bts: [B3]
+competencesE5: ['gerer-patrimoine', 'repondre-incidents']
 status: termine
-draft: true
+draft: false
 cover: ./nmap-decouverte-2026/capture-01-scan-reseau-labtainer.png
 coverAlt: "Résultat d’un scan nmap du réseau du laboratoire : deux hôtes actifs, dont un exposant un service SSH sur le port 2869"
 images:
   - src: ./nmap-decouverte-2026/capture-01-scan-reseau-labtainer.png
     alt: "Rapport nmap montrant deux hôtes actifs, l’un sans port ouvert, l’autre avec OpenSSH sur le port 2869"
     caption: "Le scan du réseau du laboratoire : le serveur recherché et son service SSH sur un port non standard"
-publicSafe: false
+publicSafe: true
 ---
 
 ## Contexte

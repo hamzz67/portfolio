@@ -34,6 +34,7 @@ skills:
   - Préparation d’un déploiement Linux
   - Travail en binôme
 bts: [B1, B2, B3]
+competencesE5: ['mode-projet', 'mettre-a-disposition', 'gerer-patrimoine', 'presence-en-ligne']
 status: termine
 featured: true
 order: 1

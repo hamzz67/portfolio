@@ -18,9 +18,10 @@ skills:
   - Configuration d’un routeur (IOS)
   - Analyse d’une table de routage
 bts: [B2]
+competencesE5: ['mettre-a-disposition', 'repondre-incidents']
 status: termine
-draft: true
-publicSafe: false
+draft: false
+publicSafe: true
 ---
 
 ## Contexte
@@ -70,4 +71,4 @@ Le routage statique fonctionne et reste lisible sur deux routeurs ; il devient v
 
 **Répondre aux incidents et aux demandes d’assistance.** Savoir lire une table de routage est l’outil de diagnostic de base quand deux réseaux ne communiquent pas.
 
-<!-- TODO (captures) : le rendu déposé est le fichier Packet Tracer (.pkt / .pka), que je ne peux pas ouvrir. Captures à produire par Hamza depuis ses propres fichiers : la topologie, un `show ip route` avec les routes statiques, un `show ip route` avec les routes apprises par RIP (préfixe R), et un test de connectivité de bout en bout. -->
+<!-- Captures et compléments à produire : voir CAPTURES-A-FAIRE.md à la racine. -->

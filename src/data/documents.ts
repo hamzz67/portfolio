@@ -30,6 +30,16 @@ export interface PublicDocument {
 
 export const documents: PublicDocument[] = [
   {
+    title: 'Tableau de synthèse des compétences E5',
+    href: '/documents/Competences-E5-Hamza-Jallabi.pdf',
+    category: 'dossier',
+    // Fichier produit par `npm run pdf` à partir de la page /e5/.
+    description:
+      'Les six compétences du bloc et les réalisations qui les prouvent. Version imprimable de la cartographie, consultable en ligne sur la page Compétences E5.',
+    date: '2026-10',
+    size: '172 Ko',
+  },
+  {
     title: 'Veille technologique — sécurité des accès distants',
     href: '/documents/Veille-Hamza-Jallabi.pdf',
     category: 'dossier',

@@ -1,7 +1,13 @@
 ---
 import { profile, isPlaceholder } from '@/data/profile';
+import { formatDateLong, isoDate } from '@/lib/format';
 
 const year = new Date().getFullYear();
+
+/* Preuve de vie : le site est reconstruit et redéployé à chaque publication,
+   donc la date de compilation est bien celle de la dernière mise à jour.
+   Jamais écrite en dur — un portfolio figé depuis huit mois a l'air abandonné. */
+const build = new Date();
 const links = [
   { label: 'GitHub', href: profile.links.github },
   { label: 'LinkedIn', href: profile.links.linkedin },
@@ -22,9 +28,14 @@ const links = [
           <li><a href={l.href} target={l.href?.startsWith('http') ? '_blank' : undefined} rel={l.href?.startsWith('http') ? 'me noopener' : undefined}>{l.label}</a></li>
         ))}
         <li><a href="/presentation">Présentation</a></li>
+        <li><a href="/e5" title="Cartographie des compétences du bloc E5">Compétences E5</a></li>
+        <li><a href="/mentions-legales">Mentions légales</a></li>
         <li><a href="/.well-known/security.txt" title="RFC 9116">security.txt</a></li>
       </ul>
-      <p class="meta footer__stack mono">statique · sans tracker · fait à Strasbourg</p>
+      <p class="meta footer__stack mono">
+        <span>statique · sans tracker · fait à Strasbourg</span>
+        <span class="footer__maj">mis à jour le <time datetime={isoDate(build)}>{formatDateLong(build)}</time></span>
+      </p>
     </div>
   </div>
 </footer>
@@ -37,6 +48,9 @@ const links = [
     letter-spacing: -0.04em; color: var(--ink);
     margin-bottom: var(--s-6); user-select: none;
   }
+  .footer__stack { display: flex; flex-direction: column; gap: 0.15rem; }
+  .footer__maj { color: var(--ink-3); }
+
   .footer__mark-word--outline {
     color: transparent;
     -webkit-text-stroke: 1px var(--line-strong);

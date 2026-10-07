@@ -16,9 +16,10 @@ skills:
   - Veille technologique
   - Organisation du développement professionnel
   - Analyse de l’actualité cybersécurité
+competencesE5: ['developpement-pro']
 status: termine
-draft: true
-publicSafe: false
+draft: false
+publicSafe: true
 ---
 
 ## Contexte
@@ -65,4 +66,4 @@ Ce portfolio en fait partie : il est la trace publique et vérifiable de ce que 
 
 Le lien avec le reste de mes travaux est direct : les sujets suivis pendant cette veille — moindre privilège, correctifs non appliqués, preuve de conformité — sont exactement ceux que j’ai rencontrés ensuite en TP et en stage.
 
-<!-- TODO (documents) : le CV et la lettre de motivation ne sont pas publiés (données personnelles : adresse, téléphone). Si Hamza veut publier un CV, il faut en faire une version publique sans adresse ni numéro, à déposer dans public/documents/ et à déclarer dans src/data/documents.ts + profile.links.cv. -->
+<!-- Captures et compléments à produire : voir CAPTURES-A-FAIRE.md à la racine. -->

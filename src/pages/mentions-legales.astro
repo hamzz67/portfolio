@@ -1,0 +1,104 @@
+---
+import Base from '@/layouts/Base.astro';
+import { profile } from '@/data/profile';
+import { formatDateLong } from '@/lib/format';
+
+/* Date du dernier déploiement : le site est reconstruit à chaque publication. */
+const miseAJour = formatDateLong(new Date());
+---
+
+<Base
+  title="Mentions légales"
+  description="Éditeur, hébergeur, propriété intellectuelle et absence de collecte de données personnelles sur ce portfolio."
+>
+  <section class="section">
+    <div class="container">
+      <div class="head" data-index="Informations légales">
+        <h1>Mentions légales</h1>
+        <p>Ce site est un portfolio personnel d’étudiant, sans activité commerciale.</p>
+      </div>
+
+      <div class="legal prose">
+        <h2>Éditeur du site</h2>
+        <p>
+          {profile.name}, étudiant en BTS SIO option SISR au {profile.school}, {profile.city}.<br />
+          Contact : <a href={`mailto:${profile.links.email}`}>{profile.links.email}</a>
+        </p>
+        <p class="meta">
+          Site édité à titre personnel et non professionnel. Aucune activité commerciale, aucune
+          publicité, aucun partenariat rémunéré.
+        </p>
+
+        <h2>Hébergement</h2>
+        <p>
+          Cloudflare Pages — Cloudflare, Inc., 101 Townsend St, San Francisco, CA 94107, États-Unis.<br />
+          <a href="https://www.cloudflare.com" target="_blank" rel="noopener noreferrer">cloudflare.com</a>
+        </p>
+
+        <h2>Données personnelles</h2>
+        <p>
+          <strong>Ce site ne collecte aucune donnée personnelle.</strong> Il est entièrement statique :
+          pas de formulaire, pas de compte, pas de base de données, aucun traitement côté serveur.
+        </p>
+        <ul>
+          <li>Aucun cookie n’est déposé.</li>
+          <li>Aucun outil de mesure d’audience n’est utilisé.</li>
+          <li>Aucune ressource n’est chargée depuis un service tiers : les polices sont hébergées
+            avec le site, les icônes sont intégrées aux pages.</li>
+          <li>Aucune donnée n’est transmise à un tiers, puisqu’aucune donnée n’est recueillie.</li>
+        </ul>
+        <p class="meta">
+          L’hébergeur conserve de son côté des journaux techniques de connexion (adresse IP, horodatage),
+          nécessaires au fonctionnement et à la sécurité du service. Je n’y ai pas accès et n’en fais
+          aucun usage.
+        </p>
+
+        <h2>Propriété intellectuelle</h2>
+        <p>
+          Les textes, schémas et captures d’écran présentés sont des productions personnelles, réalisées
+          dans le cadre de ma formation ou de mon stage. Le code source du site est public et consultable
+          sur <a href={profile.links.github} target="_blank" rel="noopener noreferrer">GitHub</a>.
+        </p>
+        <p>
+          Les marques, logos et noms de produits cités (Cisco, Microsoft, Fortinet, Citrix et autres)
+          appartiennent à leurs détenteurs respectifs et ne sont mentionnés qu’à titre descriptif.
+        </p>
+
+        <h2>Contenus professionnels</h2>
+        <p>
+          Les travaux issus de mon stage sont publiés dans une version volontairement expurgée : aucune
+          donnée client, aucun identifiant, aucune configuration réelle, aucune coordonnée de tiers. Les
+          captures d’écran sont anonymisées et présentent un jeu de données de démonstration.
+        </p>
+        <p>
+          Les travaux issus de ma formation ne reprennent que mes propres rendus. Les énoncés, supports
+          de cours et sujets d’évaluation des enseignants ne sont jamais republiés.
+        </p>
+
+        <h2>Signaler un problème</h2>
+        <p>
+          Si vous estimez qu’un contenu vous concerne et ne devrait pas figurer ici, écrivez-moi : je le
+          retirerai sans discuter du bien-fondé de la demande. Un fichier{' '}
+          <a href="/.well-known/security.txt">security.txt</a> (RFC 9116) précise la marche à suivre
+          pour signaler un problème de sécurité.
+        </p>
+
+        <h2>Accessibilité</h2>
+        <p>
+          Le site vise un contenu intégralement lisible sans JavaScript, utilisable au clavier, avec un
+          contraste suffisant en thème clair comme en thème sombre, et des pages longues imprimables.
+          Si vous rencontrez un obstacle, signalez-le moi : c’est un défaut, pas une fatalité.
+        </p>
+
+        <p class="maj meta">Dernière mise à jour : {miseAJour}.</p>
+      </div>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .legal h2 { font-size: var(--text-md); }
+  .legal ul { padding-left: 1.3em; list-style: disc; }
+  .legal li + li { margin-top: 0.35em; }
+  .maj { margin-top: var(--s-7); padding-top: var(--s-4); border-top: 1px solid var(--line); }
+</style>

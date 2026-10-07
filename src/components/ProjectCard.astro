@@ -107,6 +107,14 @@ const more = d.technologies.length - techs.length;
   .work__status { color: var(--warn); }
   .work__summary { color: var(--ink-2); max-width: var(--measure); }
   .work__main .tags { margin-top: 0.2rem; }
-  .work__thumb { display: block; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; background: var(--bg-2); align-self: start; }
+  /* Sous 720 px la carte repasse sur une colonne. Sans largeur maximale, la
+     vignette — servie en 160 px — s'étirerait sur toute la largeur : floue, et
+     illisible quand la couverture est une capture de terminal. */
+  .work__thumb {
+    display: block; border: 1px solid var(--line); border-radius: var(--radius);
+    overflow: hidden; background: var(--bg-2); align-self: start;
+    width: min(160px, 45%);
+  }
+  @media (min-width: 720px) { .work__thumb { width: 100%; } }
   .work__thumb :global(img) { width: 100%; height: auto; }
 </style>

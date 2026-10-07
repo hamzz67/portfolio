@@ -21,6 +21,7 @@ skills:
   - Analyse de risque
   - Remédiation et vérification
 bts: [B1, B3]
+competencesE5: ['gerer-patrimoine', 'repondre-incidents', 'mettre-a-disposition']
 status: termine
 featured: true
 order: 2

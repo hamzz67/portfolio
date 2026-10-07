@@ -1,0 +1,291 @@
+---
+import Base from '@/layouts/Base.astro';
+import Icon from '@/components/Icon.astro';
+import { getCouverture, getBilanE5, getRealisations } from '@/lib/e5';
+import { COMPETENCES_E5 } from '@/data/competences-e5';
+
+const couverture = await getCouverture();
+const bilan = await getBilanE5();
+const realisations = await getRealisations();
+
+const NIVEAUX = {
+  couverte: { label: 'Couverte', note: 'au moins deux réalisations' },
+  faible: { label: 'À renforcer', note: 'une seule réalisation' },
+  absente: { label: 'Non couverte', note: 'aucune réalisation' },
+} as const;
+---
+
+<Base
+  title="Cartographie des compétences E5"
+  description="Tableau de synthèse du bloc E5 : chaque compétence du référentiel et les réalisations du portfolio qui la prouvent, avec les compétences à renforcer signalées."
+  type="article"
+>
+  <section class="section">
+    <div class="container">
+      <div class="head" data-index="Épreuve E5">
+        <h1>Cartographie des compétences</h1>
+        <p>
+          Les six compétences du bloc, et pour chacune les réalisations de ce portfolio qui la prouvent.
+          Ce tableau est <strong>généré</strong> à partir des fiches : il ne peut pas diverger de leur contenu.
+        </p>
+      </div>
+
+      <ul class="bilan" role="list">
+        <li><b>{bilan.realisations}</b><span>réalisations</span></li>
+        <li class="bilan--ok"><b>{bilan.couvertes}</b><span>compétences couvertes</span></li>
+        <li class={bilan.faibles ? 'bilan--warn' : ''}><b>{bilan.faibles}</b><span>à renforcer</span></li>
+        <li class={bilan.absentes ? 'bilan--bad' : ''}><b>{bilan.absentes}</b><span>non couvertes</span></li>
+      </ul>
+
+      {bilan.aRenforcer.length > 0 && (
+        <p class="alerte">
+          <Icon name="info" />
+          <span>
+            À renforcer en priorité :
+            {bilan.aRenforcer.map((c, i) => (
+              <>
+                {i > 0 && ', '}
+                <a href={`#${c.id}`}>{c.court}</a>
+                <span class="meta"> ({c.realisations.length === 0 ? 'rien' : '1 réalisation'})</span>
+              </>
+            ))}.
+          </span>
+        </p>
+      )}
+    </div>
+  </section>
+
+  {/* ================= TABLEAU DE SYNTHÈSE ================= */}
+  <section class="section">
+    <div class="container">
+      <h2 class="titre">Tableau de synthèse</h2>
+
+      <div class="tableau">
+        <table>
+          <caption class="sr-only">Compétences du bloc E5 et réalisations qui les couvrent</caption>
+          <thead>
+            <tr>
+              <th scope="col">Compétence</th>
+              <th scope="col">Réalisations</th>
+              <th scope="col">État</th>
+            </tr>
+          </thead>
+          <tbody>
+            {couverture.map((c) => (
+              <tr class={`ligne ligne--${c.niveau}`} id={c.id}>
+                <th scope="row">
+                  <span class="comp__label">{c.label}</span>
+                  <code class="comp__id mono">{c.id}</code>
+                </th>
+                <td>
+                  {c.realisations.length === 0 ? (
+                    <span class="vide">Aucune réalisation ne couvre encore cette compétence.</span>
+                  ) : (
+                    <ul class="liens" role="list">
+                      {c.realisations.map((r) => (
+                        <li>
+                          <a href={r.href}>{r.titre}</a>
+                          <span class="meta"> — {r.nature}, {r.quand}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  )}
+                </td>
+                <td>
+                  <span class={`etat etat--${c.niveau}`}>{NIVEAUX[c.niveau].label}</span>
+                  <span class="meta etat__note">{c.realisations.length} · {NIVEAUX[c.niveau].note}</span>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <p class="note meta">
+        Une compétence n’est cochée que si la fiche la prouve réellement. Un tableau complaisant se
+        repère en trois questions à l’oral.
+      </p>
+    </div>
+  </section>
+
+  {/* ================= VUE INVERSE ================= */}
+  <section class="section">
+    <div class="container">
+      <h2 class="titre">Par réalisation</h2>
+      <p class="intro">La même information dans l’autre sens : ce que chaque travail démontre.</p>
+
+      <ul class="rows realisations" role="list">
+        {realisations.map((r) => (
+          <li class="row realisation">
+            <div>
+              <p class="row-title"><a href={r.href}>{r.titre}</a></p>
+              <p class="meta">{r.nature} · {r.quand}</p>
+            </div>
+            <ul class="tags" role="list">
+              {r.competences.length === 0 ? (
+                <li class="meta">— aucune compétence E5 déclarée</li>
+              ) : (
+                r.competences.map((id) => (
+                  <li><a class="tag" href={`#${id}`}>{COMPETENCES_E5[id].court}</a></li>
+                ))
+              )}
+            </ul>
+          </li>
+        ))}
+      </ul>
+    </div>
+  </section>
+
+  {/* ================= MÉTHODE ================= */}
+  <section class="section">
+    <div class="container">
+      <h2 class="titre">Comment ce tableau est construit</h2>
+      <div class="prose">
+        <p>
+          Chaque fiche de travail porte, dans son en-tête, la liste des compétences qu’elle mobilise.
+          Le tableau ci-dessus est produit à la compilation du site à partir de ces déclarations :
+          ajouter une fiche met le tableau à jour, et retirer la dernière réalisation d’une compétence
+          la fait réapparaître comme non couverte.
+        </p>
+        <p>
+          C’est volontaire. Un tableau de synthèse recopié à la main diverge de son contenu en moins de
+          deux mois, et c’est précisément à ce moment-là qu’il cesse d’être utile — quand il faudrait
+          qu’il signale ce qui manque.
+        </p>
+        <p>
+          La veille technologique compte pour <strong>une</strong> réalisation et non pour onze : c’est
+          une démarche suivie dans le temps, pas onze travaux distincts.
+        </p>
+      </div>
+
+      <p class="retour">
+        <a class="btn btn--secondary" href="/travaux"><Icon name="arrow-right" /> Voir les travaux</a>
+      </p>
+    </div>
+  </section>
+</Base>
+
+<style>
+  .titre { font-size: var(--text-xl); margin-bottom: var(--s-4); }
+  .intro { color: var(--ink-2); margin-bottom: var(--s-5); max-width: var(--measure); }
+
+  /* ----- Bilan chiffré ----- */
+  .bilan {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+  }
+  @media (min-width: 700px) { .bilan { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+  .bilan li { background: var(--bg); padding: var(--s-4) var(--s-4) var(--s-5); display: flex; flex-direction: column; gap: 0.2rem; }
+  .bilan b { font-family: var(--font-mono); font-size: var(--text-2xl); line-height: 1; font-weight: 500; }
+  .bilan span { font-size: var(--text-sm); color: var(--ink-3); }
+  .bilan--ok b { color: var(--accent); }
+  .bilan--warn b { color: var(--warn); }
+  .bilan--bad b { color: var(--warn); }
+
+  .alerte {
+    display: flex;
+    gap: 0.6rem;
+    align-items: flex-start;
+    margin-top: var(--s-5);
+    padding: var(--s-4);
+    border: 1px solid var(--warn);
+    background: var(--warn-soft);
+    font-size: var(--text-sm);
+    color: var(--ink-2);
+  }
+  .alerte :global(.icon) { color: var(--warn); flex: none; }
+  .alerte a { color: var(--ink); text-decoration: underline; text-decoration-color: var(--warn); }
+
+  /* -----------------------------------------------------------------------
+     Tableau de synthèse.
+
+     Sur écran étroit il ne défile PAS horizontalement : chaque ligne devient
+     un bloc. C'est la page dont tout l'intérêt est la colonne « État » — la
+     reléguer hors de l'écran sur téléphone viderait la page de son sens.
+     ----------------------------------------------------------------------- */
+  .tableau table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+
+  @media (max-width: 760px) {
+    .tableau thead { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+    .tableau th, .tableau td { display: block; }
+    .tableau tbody th { width: auto; }
+    /* flex, et non block, pour pouvoir remonter l'état sous le libellé. */
+    .tableau .ligne { display: flex; flex-direction: column; padding: var(--s-4) 0 var(--s-5); border-bottom: 1px solid var(--line); }
+    .ligne > th, .ligne > td { border-bottom: 0; padding: 0 0 0 var(--s-4); }
+    .ligne > th { order: 1; }
+    /* L'état d'abord : c'est ce qu'on vient chercher sur cette page. */
+    .ligne > td:last-child { order: 2; padding-top: var(--s-3); }
+    .ligne > td:first-of-type { order: 3; padding-top: var(--s-4); }
+    .etat__note { display: inline; margin-left: 0.4rem; }
+  }
+
+  @media (min-width: 761px) {
+    .tableau { overflow-x: auto; }
+    .tableau table { min-width: 44rem; }
+  }
+  .tableau th, .tableau td {
+    text-align: left;
+    padding: var(--s-4) var(--s-4) var(--s-4) 0;
+    border-bottom: 1px solid var(--line);
+    vertical-align: top;
+  }
+  .tableau thead th {
+    font-weight: 500;
+    font-size: var(--text-xs);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--ink-3);
+    border-bottom-color: var(--line-strong);
+    padding-block: 0.5rem;
+  }
+  .tableau tbody th { width: 30%; }
+
+  .ligne { scroll-margin-top: calc(var(--header-h) + 1rem); }
+  /* Le trait de gauche porte l'information d'état, en plus de la couleur du libellé. */
+  .ligne > th { border-left: 3px solid transparent; padding-left: var(--s-4); }
+  .ligne--couverte > th { border-left-color: var(--accent); }
+  .ligne--faible > th { border-left-color: var(--warn); }
+  .ligne--absente > th { border-left-color: var(--warn); }
+  .ligne--absente { background: var(--warn-soft); }
+
+  .comp__label { display: block; font-weight: 600; color: var(--ink); }
+  .comp__id { display: block; margin-top: 0.2rem; font-size: 0.72rem; color: var(--ink-3); }
+
+  .liens li + li { margin-top: 0.35rem; }
+  .liens a { color: var(--ink-2); text-decoration: underline; text-decoration-color: var(--line-strong); }
+  .liens a:hover { color: var(--accent); text-decoration-color: currentColor; }
+  .vide { color: var(--ink-3); font-style: italic; }
+
+  .etat {
+    display: inline-block;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.07em;
+    padding: 0.08rem 0.4rem;
+    border: 1px solid currentColor;
+    white-space: nowrap;
+  }
+  .etat--couverte { color: var(--accent); }
+  .etat--faible, .etat--absente { color: var(--warn); }
+  .etat__note { display: block; margin-top: 0.3rem; }
+
+  .note { margin-top: var(--s-5); padding-left: 0.8rem; border-left: 2px solid var(--line-strong); max-width: var(--measure); }
+
+  /* ----- Vue par réalisation ----- */
+  .realisation { display: grid; gap: var(--s-3); align-items: start; }
+  @media (min-width: 760px) { .realisation { grid-template-columns: minmax(0, 1fr) minmax(0, 20rem); gap: var(--s-5); } }
+  .realisation .tags { align-content: start; }
+
+  .retour { margin-top: var(--s-6); }
+
+  @media print {
+    .alerte { border-color: #888; background: #fff; }
+    .ligne--absente { background: #fff; }
+    .tableau { overflow: visible; }
+    .tableau table { min-width: 0; }
+  }
+</style>

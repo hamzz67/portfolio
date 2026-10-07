@@ -19,9 +19,10 @@ skills:
   - Filtrage et pare-feu
   - Modèle OSI
 bts: [B3]
+competencesE5: ['repondre-incidents', 'gerer-patrimoine']
 status: termine
-draft: true
-publicSafe: false
+draft: false
+publicSafe: true
 ---
 
 ## Contexte
@@ -71,4 +72,4 @@ Un ping qui échoue ne veut pas dire « machine éteinte ». Sur ce TP, les post
 
 **Gérer le patrimoine informatique.** Une règle de pare-feu est un élément de configuration du poste, avec un effet direct sur ce qui fonctionne ou non : la créer, la tester puis la désactiver fait partie de la tenue correcte d’un parc.
 
-<!-- TODO (captures) : toutes les images du compte rendu venaient de l'énoncé du prof (captures de 2021, réseau inconnu) : rien de publiable. Si Hamza veut illustrer cette fiche, il peut refaire en 5 min sur son PC : 1) Wireshark filtré sur icmp pendant un ping vers la box, 2) le détail d'une trame déplié (Frame / Ethernet II / IP / ICMP), 3) la règle ICMPv4 dans le pare-feu Windows. Masquer les IP publiques et le nom du réseau. -->
+<!-- Captures et compléments à produire : voir CAPTURES-A-FAIRE.md à la racine. -->

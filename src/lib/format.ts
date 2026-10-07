@@ -47,3 +47,9 @@ export function isoDate(date: Date): string {
 export function pad2(n: number): string {
   return String(n).padStart(2, '0');
 }
+
+/** "7 octobre 2026" — date longue en français, pour les mentions et le pied de page. */
+export function formatDateLong(date: Date | string): string {
+  const d = typeof date === 'string' ? parseIso(date) : date;
+  return `${d.getDate()} ${MONTHS_FR[d.getMonth()]} ${d.getFullYear()}`;
+}

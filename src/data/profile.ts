@@ -11,9 +11,14 @@
 export const profile = {
   name: 'Hamza Jallabi',
   firstName: 'Hamza',
-  /** Phrase d'accroche de la hero (pas de slogan cliché). */
+  /**
+   * Phrase d'accroche de la hero.
+   * Règle : une affirmation que le reste du site vérifie, pas une déclaration
+   * d'intention. « Passionné par » est ce qu'écrivent tous les étudiants ;
+   * « je conçois, configure et sécurise » se contrôle en ouvrant les fiches.
+   */
   tagline:
-    'Étudiant en BTS SIO SISR — passionné par les infrastructures, les systèmes et la cybersécurité.',
+    'Je conçois, configure et sécurise des infrastructures réseau et systèmes. BTS SIO SISR, major de promotion.',
   role: 'Étudiant en BTS SIO SISR',
   school: 'Lycée René Cassin',
   city: 'Strasbourg',
@@ -54,7 +59,7 @@ export const profile = {
   links: {
     email: 'hamza.jallabi20@gmail.com' as string | undefined,
     github: 'https://github.com/hamzz67' as string | undefined,
-    linkedin: 'https://fr.linkedin.com/in/hamza-jallabi-b17980317' as string | undefined,
+    linkedin: 'https://www.linkedin.com/in/hamza-jallabi' as string | undefined,
     /** Chemin du CV public dans /public/documents (ou undefined pour masquer). */
     cv: '/documents/CV-Hamza-Jallabi.pdf' as string | undefined, // régénérer avec `npm run cv`
   },
