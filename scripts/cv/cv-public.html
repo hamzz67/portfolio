@@ -1,0 +1,177 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>CV — Hamza Jallabi — BTS SIO SISR</title>
+<!--
+  SOURCE DU CV PUBLIC.
+
+  Version publique : SANS numéro de téléphone, SANS adresse postale,
+  SANS date de naissance, SANS photo (voir CONTENT-SAFETY.md).
+  La version de candidature (avec le téléphone) reste dans private/.
+
+  Régénérer le PDF :
+    npm run cv
+  ou à la main :
+    msedge --headless=new --disable-gpu --no-pdf-header-footer \
+           --print-to-pdf="public/documents/CV-Hamza-Jallabi.pdf" \
+           "scripts/cv/cv-public.html"
+-->
+<style>
+  @page { size: A4; margin: 13mm 15mm; }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    font-family: Calibri, Carlito, "Segoe UI", sans-serif;
+    font-size: 10pt;
+    line-height: 1.32;
+    color: #111;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  a { color: inherit; text-decoration: none; }
+
+  /* --- En-tête --- */
+  h1 {
+    font-size: 23pt;
+    font-weight: 700;
+    letter-spacing: 0.4pt;
+    margin: 0 0 2pt;
+  }
+  .poste {
+    font-size: 12pt;
+    font-weight: 700;
+    color: #1F3A8A;
+    margin: 0 0 5pt;
+  }
+  .contact { font-size: 10pt; margin: 0 0 1.5pt; }
+  .contact + .contact { margin-bottom: 9pt; }
+
+  /* --- Sections --- */
+  h2 {
+    font-size: 10.5pt;
+    font-weight: 700;
+    letter-spacing: 0.5pt;
+    text-transform: uppercase;
+    color: #1F3A8A;
+    margin: 10pt 0 0;
+    padding-bottom: 1.5pt;
+    border-bottom: 0.75pt solid #1F3A8A;
+  }
+  h2 + * { margin-top: 5pt; }
+
+  /* --- Entrées (intitulé à gauche, dates à droite) --- */
+  .entree {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    gap: 10pt;
+    margin-top: 7pt;
+  }
+  .entree:first-of-type { margin-top: 0; }
+  .entree__titre { font-weight: 700; }
+  .entree__dates {
+    color: #1F3A8A;
+    white-space: nowrap;
+    font-size: 9.5pt;
+  }
+  .lieu {
+    font-style: italic;
+    color: #333;
+    margin: 0.5pt 0 0;
+  }
+
+  p { margin: 0; }
+
+  ul {
+    margin: 2.5pt 0 0;
+    padding-left: 14pt;
+  }
+  li { margin-bottom: 1.5pt; }
+  li::marker { color: #1F3A8A; }
+
+  .ligne-comp { margin-top: 3.5pt; }
+  .ligne-comp:first-child { margin-top: 0; }
+  .ligne-comp b { color: #111; }
+</style>
+</head>
+<body>
+
+  <header>
+    <h1>HAMZA JALLABI</h1>
+    <p class="poste">Stage en administration systèmes, réseaux et sécurité – du 18 janvier au 19 février 2027</p>
+    <p class="contact"><a href="mailto:hamza.jallabi20@gmail.com">hamza.jallabi20@gmail.com</a> &nbsp;|&nbsp; Strasbourg (67000)</p>
+    <p class="contact">Portfolio : <a href="https://hamzzportfolio.pages.dev">hamzzportfolio.pages.dev</a> &nbsp;|&nbsp; GitHub : <a href="https://github.com/hamzz67">github.com/hamzz67</a> &nbsp;|&nbsp; LinkedIn : <a href="https://fr.linkedin.com/in/hamza-jallabi-b17980317">linkedin.com/in/hamza-jallabi</a></p>
+  </header>
+
+  <h2>Profil</h2>
+  <p>Étudiant en 2<sup>e</sup> année de BTS SIO option SISR (Solutions d’Infrastructure, Systèmes et Réseaux), major de promotion en 1<sup>re</sup> année, je recherche un stage de 5 semaines en administration systèmes et réseaux ou en sécurité des infrastructures. Lors de mon premier stage, j’ai conçu, sécurisé et préparé au déploiement l’application de gestion d’une entreprise.</p>
+
+  <h2>Formation</h2>
+  <div class="entree">
+    <span class="entree__titre">BTS Services Informatiques aux Organisations (SIO) – option SISR</span>
+    <span class="entree__dates">2025 – 2027</span>
+  </div>
+  <p class="lieu">Lycée René Cassin, Strasbourg</p>
+  <ul>
+    <li>1<sup>re</sup> année : 16,10 de moyenne au 2<sup>e</sup> semestre (moyenne de la classe : 12,46)</li>
+    <li>Félicitations avec mention d’excellence aux deux semestres</li>
+    <li>Délégué de classe titulaire</li>
+  </ul>
+  <div class="entree">
+    <span class="entree__titre">Baccalauréat général – spécialités Mathématiques et Informatique</span>
+    <span class="entree__dates">2021 – 2024</span>
+  </div>
+  <p class="lieu">Lycée Jean Rostand, Strasbourg</p>
+
+  <h2>Expérience en informatique</h2>
+  <div class="entree">
+    <span class="entree__titre">Stagiaire – Synerdys (diagnostics immobiliers et audit énergétique)</span>
+    <span class="entree__dates">Juin 2026 – Juillet 2026</span>
+  </div>
+  <p class="lieu">Entzheim – Stage de 1<sup>re</sup> année de BTS SIO, 5 semaines</p>
+  <ul>
+    <li>Conception et développement d’une application web de gestion — clients, dossiers, devis signés en ligne, factures : modélisation d’une base de 27 tables, architecture applicative (Python, Flask), développement assisté par IA</li>
+    <li>Sécurisation : 9 failles identifiées et corrigées, double authentification, 3 niveaux de droits d’accès, journalisation des actions sensibles</li>
+    <li>Exploitation : sauvegarde quotidienne automatique avec rotation sur 7 jours, tâches planifiées, 32 tests automatisés lancés à chaque modification (pytest, GitHub Actions)</li>
+    <li>Préparation de la mise en production sur un serveur Ubuntu : Nginx, Gunicorn, PostgreSQL, HTTPS, pare-feu, procédure de déploiement rédigée</li>
+  </ul>
+
+  <h2>Compétences techniques et certifications</h2>
+  <p class="ligne-comp"><b>Réseau :</b> adressage IPv4 et VLSM, routage statique et RIP, VLAN et routage inter-VLAN, NAT/PAT, sécurisation de commutateurs (matériel Cisco, Packet Tracer)</p>
+  <p class="ligne-comp"><b>Systèmes :</b> Linux (ligne de commande, installation), Windows Server 2022, Active Directory, virtualisation avec VirtualBox</p>
+  <p class="ligne-comp"><b>Sécurité :</b> Wireshark, nmap, pare-feu et filtrage, TLS/SSL, sauvegarde, supervision SNMP</p>
+  <p class="ligne-comp"><b>Outils :</b> GLPI (gestion de parc), Git et GitHub, GitHub Actions, Python (bases), Visual Studio Code, Pack Office</p>
+  <p class="ligne-comp"><b>Certifications :</b> SecNumacadémie (MOOC de cybersécurité de l’ANSSI) ; Cisco Networking Academy : Introduction à la cybersécurité, Les bases du matériel informatique, Introduction à l’IA moderne</p>
+
+  <h2>Autres expériences professionnelles</h2>
+  <div class="entree">
+    <span class="entree__titre">Agent logistique – Aston Sécurité</span>
+    <span class="entree__dates">Depuis 2026</span>
+  </div>
+  <ul>
+    <li>Suivi et traçabilité des équipements et accréditations remis aux agents, application des procédures de sécurité</li>
+  </ul>
+  <div class="entree">
+    <span class="entree__titre">Orientateur stade – UGOË (Racing Club de Strasbourg)</span>
+    <span class="entree__dates">2023 – 2025</span>
+  </div>
+  <ul>
+    <li>Accueil et information du public, gestion des flux lors des matchs et événements</li>
+  </ul>
+  <div class="entree">
+    <span class="entree__titre">Emplois étudiants : caissier, employé polyvalent en rayon textile, employé en boulangerie</span>
+    <span class="entree__dates">2024 – 2025</span>
+  </div>
+  <ul>
+    <li>Relation client, travail en équipe, gestion des priorités en période d’affluence</li>
+  </ul>
+
+  <h2>Langues</h2>
+  <p>Français (langue maternelle), Arabe (langue maternelle), Anglais (B2), Allemand (B1)</p>
+
+</body>
+</html>

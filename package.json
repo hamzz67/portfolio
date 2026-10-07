@@ -10,7 +10,8 @@
     "build:only": "astro build",
     "preview": "astro preview",
     "check": "astro check",
-    "icons": "node scripts/generate-icons.mjs"
+    "icons": "node scripts/generate-icons.mjs",
+    "cv": "node scripts/generate-cv.mjs"
   },
   "dependencies": {
     "@astrojs/sitemap": "^3.7.4",

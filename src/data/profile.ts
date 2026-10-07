@@ -56,7 +56,7 @@ export const profile = {
     github: 'https://github.com/hamzz67' as string | undefined,
     linkedin: 'https://fr.linkedin.com/in/hamza-jallabi-b17980317' as string | undefined,
     /** Chemin du CV public dans /public/documents (ou undefined pour masquer). */
-    cv: undefined as string | undefined, // ex. '/documents/cv-hamza-jallabi.pdf'
+    cv: '/documents/CV-Hamza-Jallabi.pdf' as string | undefined, // régénérer avec `npm run cv`
   },
 
   /** Disponibilité affichée dans la section contact (optionnel). */
