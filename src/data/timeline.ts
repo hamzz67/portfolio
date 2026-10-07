@@ -35,7 +35,7 @@ export const timeline: TimelineItem[] = [
     date: '2026',
     iso: '2026-01',
     title: 'Première année + stage',
-    description: 'Travaux pratiques réseau et systèmes, préparation du stage de première année.',
+    description: 'Travaux pratiques réseau et sécurité : analyse de trames, pare-feu, routage, VLAN, découverte de nmap. Veille technologique et préparation du stage.',
   },
   {
     date: 'Juin – juil. 2026',
@@ -51,6 +51,13 @@ export const timeline: TimelineItem[] = [
     iso: '2026-09',
     title: 'Deuxième année du BTS SIO SISR',
     description: 'Approfondissement : administration, cybersécurité des services, projets.',
+  },
+  {
+    date: 'Sept. 2026',
+    iso: '2026-09',
+    title: 'Audit Active Directory et remise en conformité des droits',
+    description: 'Audit d’un annuaire et des droits NTFS sur Windows Server 2022 : huit anomalies relevées, corrigées et vérifiées.',
+    href: '/travaux/audit-ad-rbac-2026',
   },
   {
     date: 'Juillet 2027',
