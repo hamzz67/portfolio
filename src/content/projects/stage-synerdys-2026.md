@@ -34,7 +34,17 @@ skills:
   - Préparation d’un déploiement Linux
   - Travail en binôme
 bts: [B1, B2, B3]
-competencesE5: ['mode-projet', 'mettre-a-disposition', 'gerer-patrimoine', 'presence-en-ligne']
+# Le tableau de synthèse officiel découpe ce stage en sept réalisations, qui
+# couvrent à elles toutes les six compétences du bloc. La fiche étant unique,
+# elle porte leur union — et non une compétence de plus que le document remis
+# au jury.
+competencesE5:
+  - gerer-patrimoine       # sécurisation, sauvegardes quotidiennes, journalisation
+  - repondre-incidents     # analyse du besoin, demandes d'évolution, accompagnement du gérant
+  - presence-en-ligne      # liaison entre l'application et le site vitrine de l'entreprise
+  - mode-projet            # suivi hebdomadaire, binôme, préparation de la mise en production
+  - mettre-a-disposition   # tests d'intégration, déploiement, prise en main par l'utilisateur
+  - developpement-pro      # autoformation Python / Flask
 status: termine
 featured: true
 order: 1
