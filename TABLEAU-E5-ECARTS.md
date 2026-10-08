@@ -79,6 +79,16 @@ captures.
 → **À ajouter au tableau**, dans « Réalisations en cours de formation » :
 `gerer-patrimoine`, `repondre-incidents`, `mettre-a-disposition`.
 
+### La fiche « Ce portfolio » (ajoutée le 8 octobre 2026)
+
+La fiche `portfolio-infrastructure-2026` (déploiement continu, en-têtes de
+sécurité notés A+ par Mozilla Observatory, deux incidents de production
+corrigés) **n'est pas dans le tableau**. C'est une réalisation personnelle et
+la seule preuve hors stage de `presence-en-ligne`.
+
+→ **À ajouter au tableau**, dans « Réalisations en cours de formation » :
+`presence-en-ligne`, `mettre-a-disposition`, `repondre-incidents`.
+
 ---
 
 ## Ce qui a été aligné
