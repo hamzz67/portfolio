@@ -1,6 +1,7 @@
 // @ts-check
 import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
+import cspHashes from './src/integrations/csp-hashes';
 
 /**
  * URL publique du site. Elle sert aux URL canoniques, aux balises Open Graph,
@@ -70,7 +71,7 @@ export default defineConfig({
     layout: 'constrained',
     responsiveStyles: true,
   },
-  integrations: [sitemap()],
+  integrations: [sitemap(), cspHashes()],
 
   /**
    * Polices auto-hébergées (fichiers lus dans node_modules, aucun appel externe au runtime).

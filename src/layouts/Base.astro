@@ -82,14 +82,29 @@ const personLd = {
 
     <script type="application/ld+json" set:html={JSON.stringify(jsonLd ?? personLd)} />
 
-    {/* Thème : appliqué avant le premier rendu pour éviter tout flash. */}
+    {/*
+      Thème : appliqué avant le premier rendu pour éviter tout flash.
+      Le ClientRouter remplace les attributs de <html> à chaque navigation :
+      sans le rappel sur astro:before-swap, le thème choisi et la classe js
+      (dont dépendent les apparitions au défilement) étaient perdus.
+      L'empreinte de ce script est calculée au build (src/integrations/csp-hashes.ts).
+    */}
     <script is:inline>
       (function () {
-        document.documentElement.classList.add('js');
-        try {
-          var t = localStorage.getItem('theme');
-          if (t === 'dark' || t === 'light') document.documentElement.setAttribute('data-theme', t);
-        } catch (e) {}
+        function appliquer(html) {
+          html.classList.add('js');
+          try {
+            var t = localStorage.getItem('theme');
+            if (t === 'dark' || t === 'light') html.setAttribute('data-theme', t);
+          } catch (e) {}
+        }
+        appliquer(document.documentElement);
+        if (!window.__theme) {
+          window.__theme = true;
+          document.addEventListener('astro:before-swap', function (e) {
+            appliquer(e.newDocument.documentElement);
+          });
+        }
       })();
     </script>
 
