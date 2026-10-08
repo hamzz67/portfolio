@@ -20,6 +20,16 @@ bts: [B2]
 competencesE5: ['mettre-a-disposition', 'gerer-patrimoine']
 status: termine
 draft: false
+images:
+  - src: ./vlan-trunk-2026/capture-01-journal-switch3.png
+    alt: "Journal de commandes de Switch3 le 18 mars 2026 : création des VLAN 110, 120 et 130, affectation des plages de ports 1 à 6, 7 à 12 et 13 à 18 en mode accès, puis ports 21 à 24 en trunk"
+    caption: "Configuration complète d’un commutateur en six minutes — journal de Packet Tracer, reconstitué depuis mon fichier rendu"
+  - src: ./vlan-trunk-2026/capture-02-erreur-mode-utilisateur.png
+    alt: "Journal de Switch2 : sept commandes tapées à l’invite Switch> (mode utilisateur), puis enable et reprise de la séquence à l’invite Switch(config)#"
+    caption: "L’erreur et sa correction : commandes de configuration tapées en mode utilisateur, reprises après enable"
+  - src: ./vlan-trunk-2026/capture-03-running-config-switch1.png
+    alt: "Extrait de la configuration enregistrée de Switch1 : ports 1 à 6 en accès VLAN 110, port 7 en VLAN 120, port 13 en VLAN 130, ports 21 à 24 en trunk"
+    caption: "La configuration enregistrée dans le commutateur (extrait, lignes répétitives omises)"
 publicSafe: true
 ---
 

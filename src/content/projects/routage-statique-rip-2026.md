@@ -21,6 +21,16 @@ bts: [B2]
 competencesE5: ['mettre-a-disposition', 'repondre-incidents']
 status: termine
 draft: false
+images:
+  - src: ./routage-statique-rip-2026/capture-01-journal-liaisons-serie.png
+    alt: "Journal de commandes du 4 février 2026 sur les quatre routeurs : adresse IP, clock rate 64000 et no shutdown sur l’interface Serial0/0/0 de chacun"
+    caption: "Les quatre liaisons série montées routeur par routeur — journal de Packet Tracer, reconstitué depuis mon fichier rendu"
+  - src: ./routage-statique-rip-2026/capture-02-journal-rip-router1.png
+    alt: "Journal de Router1 : router rip, version 2, trois commandes network, no auto-summary, puis show ip route, debug ip rip, no debug ip rip et show ip route"
+    caption: "Activation de RIPv2 sur Router1, puis vérification de la table de routage et observation des annonces"
+  - src: ./routage-statique-rip-2026/capture-03-running-config-router1.png
+    alt: "Extrait de la configuration enregistrée de Router1 : interfaces FastEthernet et série avec leurs adresses, clock rate sur Serial0/0/0, et bloc router rip"
+    caption: "La configuration enregistrée dans Router1 (extrait)"
 publicSafe: true
 ---
 
