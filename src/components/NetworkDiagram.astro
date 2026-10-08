@@ -1,0 +1,319 @@
+---
+/**
+ * Schéma réseau interactif : un clic sur un équipement ouvre son panneau
+ * (rôle, adressage, configuration commentée) ; les boutons de groupe isolent
+ * un VLAN ou un réseau. Sans JavaScript, le schéma reste lisible et le
+ * tableau d'adressage qui le suit donne la même information.
+ */
+import type { Topology, TopoNode, TopoLink } from '@/data/topologies/types';
+
+interface Props {
+  topology: Topology;
+}
+const { topology: t } = Astro.props;
+const uid = `topo-${Math.abs([...t.title].reduce((h, c) => (h * 31 + c.charCodeAt(0)) | 0, 7)).toString(36)}`;
+
+const byId = new Map(t.nodes.map((n) => [n.id, n]));
+const tone = (g?: string) => t.groups?.find((x) => x.id === g)?.tone;
+
+/** Demi-dimensions de chaque icône, pour accrocher les liens au bord. */
+const HALF: Record<TopoNode['kind'], [number, number]> = { switch: [60, 20], router: [22, 22], pc: [17, 14], server: [13, 18] };
+
+/** Extrémité d'un lien : on garde le tracé orthogonal quand le point voisin est aligné sur l'icône. */
+function anchor(n: TopoNode, toward: [number, number]): [number, number] {
+  const [hw, hh] = HALF[n.kind];
+  if (Math.abs(toward[1] - n.y) <= hh && toward[0] !== n.x) return [toward[0] < n.x ? n.x - hw : n.x + hw, toward[1]];
+  if (Math.abs(toward[0] - n.x) <= hw && toward[1] !== n.y) return [toward[0], toward[1] < n.y ? n.y - hh : n.y + hh];
+  return [n.x, n.y];
+}
+
+function points(l: TopoLink): [number, number][] {
+  const a = byId.get(l.a)!;
+  const b = byId.get(l.b)!;
+  const via = l.via ?? [];
+  const first = via[0] ?? [b.x, b.y];
+  const last = via[via.length - 1] ?? [a.x, a.y];
+  return [anchor(a, first), ...via, anchor(b, last)];
+}
+
+function labelPos(l: TopoLink, pts: [number, number][]): [number, number] {
+  if (l.labelAt) return l.labelAt;
+  let best = 0, len = -1;
+  for (let i = 0; i < pts.length - 1; i++) {
+    const d = Math.hypot(pts[i + 1][0] - pts[i][0], pts[i + 1][1] - pts[i][1]);
+    if (d > len) { len = d; best = i; }
+  }
+  return [(pts[best][0] + pts[best + 1][0]) / 2, (pts[best][1] + pts[best + 1][1]) / 2];
+}
+
+const drawn = t.links.map((l) => {
+  const pts = points(l);
+  return { l, pts, d: pts.map((p) => p.join(',')).join(' '), label: l.label ? labelPos(l, pts) : null };
+});
+
+const labelAbove = (n: TopoNode) => n.kind === 'pc' || n.kind === 'server';
+---
+
+<figure class="topo" id={uid} data-topo>
+  <div class="topo__bar">
+    <figcaption class="topo__title">
+      <span class="kicker">Schéma interactif</span>
+      <span class="topo__name">{t.title}</span>
+    </figcaption>
+    {t.groups && (
+      <div class="topo__filters" role="group" aria-label={`Isoler un ${t.groupLabel ?? 'groupe'}`}>
+        {t.groups.map((g) => (
+          <button type="button" class="topo__chip" data-group={g.id} data-tone={g.tone} aria-pressed="false">
+            <span class="topo__dot" aria-hidden="true"></span>{g.label}
+          </button>
+        ))}
+      </div>
+    )}
+  </div>
+
+  <div class="topo__body">
+    <div class="topo__canvas">
+      <svg viewBox={`0 0 ${t.width} ${t.height}`} role="img" aria-labelledby={`${uid}-desc`} data-topo-svg>
+        <desc id={`${uid}-desc`}>{t.title}. {t.nodes.length} équipements. Le tableau d’adressage qui suit le schéma en donne le détail.</desc>
+
+        {t.zones?.map((z) => (
+          <g class="zone">
+            <rect x={z.x} y={z.y} width={z.w} height={z.h} rx="3" />
+            <text x={z.x + 10} y={z.y + z.h - 9}>{z.label.toUpperCase()}</text>
+          </g>
+        ))}
+
+        <g class="links">
+          {drawn.map(({ l, d, label }) => (
+            <g class:list={['link', `link--${l.kind}`]} data-tone={tone(l.group)} data-group={l.group} data-ends={`${l.a}|${l.b}`}>
+              {l.kind === 'trunk' && <polyline class="link__casing" points={d} />}
+              <polyline class="link__line" points={d} />
+              {label && <text class="link__label" x={label[0]} y={label[1] - 6} text-anchor="middle">{l.label}</text>}
+            </g>
+          ))}
+        </g>
+
+        <g class="nodes">
+          {t.nodes.map((n) => (
+            <g
+              class:list={['node', `node--${n.kind}`]}
+              data-node={n.id}
+              data-group={n.group}
+              data-tone={tone(n.group)}
+              transform={`translate(${n.x} ${n.y})`}
+              tabindex="0"
+              role="button"
+              aria-label={`${n.label} : afficher le détail`}
+              aria-controls={`${uid}-panel`}
+            >
+              <rect class="node__hit" x={-HALF[n.kind][0] - 8} y={-HALF[n.kind][1] - (labelAbove(n) ? 24 : 8)} width={HALF[n.kind][0] * 2 + 16} height={HALF[n.kind][1] * 2 + (labelAbove(n) ? 32 : 16)} />
+              {n.kind === 'switch' && (
+                <>
+                  <rect class="node__body" x="-60" y="-20" width="120" height="40" rx="3" />
+                  {Array.from({ length: 12 }, (_, i) => <rect class="node__port" x={-50 + i * 8.5} y="9" width="5" height="4" />)}
+                  <text class="node__label" y="-1" text-anchor="middle">{n.label}</text>
+                </>
+              )}
+              {n.kind === 'router' && (
+                <>
+                  <circle class="node__body" r="22" />
+                  <path class="node__glyph" d="M-11 -4 h22 l-5 -5 M11 4 h-22 l5 5" />
+                  <text class="node__label" y="38" text-anchor="middle">{n.label}</text>
+                </>
+              )}
+              {n.kind === 'pc' && (
+                <>
+                  <rect class="node__body" x="-17" y="-14" width="34" height="22" rx="2" />
+                  <path class="node__glyph" d="M-6 12 h12 M0 8 v4" />
+                  <circle class="node__led" cx="0" cy="-3" r="3.2" />
+                  <text class="node__label" y="-21" text-anchor="middle">{n.label}</text>
+                </>
+              )}
+              {n.kind === 'server' && (
+                <>
+                  <rect class="node__body" x="-13" y="-18" width="26" height="36" rx="2" />
+                  <path class="node__glyph" d="M-7 -9 h14 M-7 -2 h14 M-7 5 h14" />
+                  <circle class="node__led" cx="0" cy="12" r="2.6" />
+                  <text class="node__label" y="-25" text-anchor="middle">{n.label}</text>
+                </>
+              )}
+            </g>
+          ))}
+        </g>
+      </svg>
+    </div>
+
+    <aside class="topo__panel" id={`${uid}-panel`} aria-live="polite">
+      <div class="topo__card" data-card="">
+        <p class="kicker">Mode d’emploi</p>
+        <p>{t.intro}</p>
+        {t.groups && (
+          <dl class="topo__facts">
+            {t.groups.map((g) => (<div><dt><span class="topo__dot" data-tone={g.tone}></span>{t.groupLabel} {g.label}</dt><dd>{g.detail}</dd></div>))}
+          </dl>
+        )}
+      </div>
+      {t.nodes.map((n) => (
+        <div class="topo__card" data-card={n.id} hidden>
+          <p class="kicker">{{ switch: 'Commutateur', router: 'Routeur', pc: 'Poste', server: 'Serveur' }[n.kind]}</p>
+          <h3 class="topo__h">{n.label}</h3>
+          <p>{n.role}</p>
+          {n.facts && (
+            <dl class="topo__facts">
+              {n.facts.map(([k, v]) => (<div><dt>{k}</dt><dd>{v}</dd></div>))}
+            </dl>
+          )}
+          {n.config && (
+            <details class="topo__config" open>
+              <summary>Configuration tapée <span class="meta">({n.config.length} lignes)</span></summary>
+              <ol class="cfg" role="list">
+                {n.config.map((c) => (
+                  <li>
+                    <code>{c.cmd}</code>
+                    {c.note && <span class="cfg__note">{c.note}</span>}
+                  </li>
+                ))}
+              </ol>
+            </details>
+          )}
+          {n.note && <p class="topo__note">{n.note}</p>}
+        </div>
+      ))}
+    </aside>
+  </div>
+  <p class="topo__source meta">{t.source}</p>
+</figure>
+
+<style>
+  .topo { container-type: inline-size; margin: 0 0 var(--s-7); border: 1px solid var(--line); border-radius: var(--radius); background: var(--bg-elev); }
+  .topo__bar { display: flex; flex-wrap: wrap; align-items: end; justify-content: space-between; gap: var(--s-3) var(--s-5); padding: var(--s-4) var(--s-4) var(--s-3); border-bottom: 1px solid var(--line); }
+  .topo__title { display: grid; gap: 2px; }
+  .topo__name { font-weight: 650; font-stretch: var(--display-stretch); font-size: var(--text-md); }
+  .topo__filters { display: flex; flex-wrap: wrap; gap: var(--s-2); }
+  .topo__chip {
+    display: inline-flex; align-items: center; gap: 0.45em; padding: 0.3em 0.75em;
+    font: 500 var(--text-xs) / 1.3 var(--font-mono); color: var(--ink-2);
+    background: transparent; border: 1px solid var(--line-strong); border-radius: 999px; cursor: pointer;
+    transition: border-color var(--dur) var(--ease), background var(--dur) var(--ease), color var(--dur) var(--ease);
+  }
+  .topo__chip:hover { color: var(--ink); border-color: var(--ink-3); }
+  .topo__chip[aria-pressed='true'] { color: var(--ink); border-color: var(--tc); background: color-mix(in srgb, var(--tc) 12%, transparent); }
+  .topo__dot { width: 0.6em; height: 0.6em; border-radius: 50%; background: var(--tc, var(--ink-3)); flex: none; display: inline-block; }
+
+  [data-tone='1'] { --tc: var(--topo-1); }
+  [data-tone='2'] { --tc: var(--topo-2); }
+  [data-tone='3'] { --tc: var(--topo-3); }
+  [data-tone='4'] { --tc: var(--topo-4); }
+
+  .topo__body { display: grid; grid-template-columns: minmax(0, 1fr); }
+  .topo__canvas { overflow-x: auto; padding: var(--s-3); border-bottom: 1px solid var(--line); }
+  .topo__canvas svg { display: block; width: 100%; min-width: 520px; height: auto; font-family: var(--font-mono); }
+  @container (min-width: 1000px) {
+    .topo__body { grid-template-columns: minmax(0, 1fr) 19rem; }
+    .topo__canvas { border-bottom: 0; border-right: 1px solid var(--line); }
+  }
+
+  .zone rect { fill: var(--bg-2, var(--bg)); stroke: var(--line); stroke-dasharray: 3 4; }
+  .zone text { font-size: 9.5px; letter-spacing: 0.12em; fill: var(--ink-3); }
+
+  .link polyline { fill: none; stroke-linejoin: round; transition: opacity var(--dur-slow) var(--ease), stroke var(--dur) var(--ease); }
+  .link__line { stroke: var(--tc, var(--ink-3)); stroke-width: 1.6; }
+  .link--trunk .link__casing { stroke: var(--ink); stroke-width: 6; }
+  .link--trunk .link__line { stroke: var(--bg-elev); stroke-width: 2.4; }
+  .link--serial .link__line { stroke: var(--ink-2); stroke-width: 1.8; stroke-dasharray: 7 3 1.5 3; }
+  .link__label { font-size: 9.5px; fill: var(--ink-2); paint-order: stroke; stroke: var(--bg-elev); stroke-width: 4px; }
+
+  .link.is-near .link__line { stroke-width: 2.8; }
+  .link--trunk.is-near .link__casing { stroke: var(--accent); }
+
+  .node { cursor: pointer; outline: none; transition: opacity var(--dur-slow) var(--ease); }
+  .node__hit { fill: transparent; }
+  .node__body { fill: var(--bg-elev); stroke: var(--ink); stroke-width: 1.4; transition: stroke var(--dur) var(--ease), fill var(--dur) var(--ease); }
+  .node--pc .node__body, .node--server .node__body { stroke: var(--tc, var(--ink)); }
+  .node__glyph { fill: none; stroke: var(--ink-2); stroke-width: 1.3; stroke-linecap: round; }
+  .node__port { fill: var(--ink-3); }
+  .node__led { fill: var(--tc, var(--accent)); }
+  .node__label { font-size: 10.5px; font-weight: 500; fill: var(--ink); }
+  .node:hover .node__body, .node:focus-visible .node__body { fill: var(--accent-soft); }
+  .node:focus-visible .node__hit { stroke: var(--accent); stroke-width: 1.5; stroke-dasharray: 3 3; }
+  .node.is-active .node__body { stroke: var(--accent); stroke-width: 2.4; fill: var(--accent-soft); }
+
+  /* Filtre de groupe : le reste s'estompe, les liens du groupe pulsent doucement. */
+  [data-topo][data-focus] .link[data-group]:not(.is-on),
+  [data-topo][data-focus] .node[data-group]:not(.is-on) { opacity: 0.14; }
+  [data-topo][data-focus] .link.is-on .link__line { stroke-width: 2.6; stroke-dasharray: 6 5; animation: topo-flow 1.1s linear infinite; }
+  [data-topo][data-focus] .link--trunk .link__casing { stroke: var(--fc); stroke-width: 7; }
+  @keyframes topo-flow { to { stroke-dashoffset: -11; } }
+  @media (prefers-reduced-motion: reduce) {
+    [data-topo][data-focus] .link.is-on .link__line { animation: none; stroke-dasharray: none; }
+  }
+
+  .topo__panel { padding: var(--s-4); font-size: var(--text-sm); }
+  .topo__card > * + * { margin-top: var(--s-3); }
+  .topo__h { font-size: var(--text-lg); font-stretch: var(--display-stretch); margin-top: var(--s-1) !important; }
+  .topo__facts { display: grid; gap: 0; border-top: 1px solid var(--line); }
+  .topo__facts > div { display: grid; grid-template-columns: 7.5em 1fr; gap: var(--s-2); padding: 0.4em 0; border-bottom: 1px solid var(--line); }
+  .topo__facts dt { color: var(--ink-3); display: flex; align-items: center; gap: 0.4em; }
+  .topo__facts dd { margin: 0; font-family: var(--font-mono); font-size: var(--text-xs); }
+  .topo__config summary { cursor: pointer; font-weight: 600; }
+  .cfg { list-style: none; margin: var(--s-2) 0 0; padding: 0; counter-reset: l; font-size: var(--text-xs); }
+  .cfg li { counter-increment: l; display: grid; grid-template-columns: 1.6em 1fr; column-gap: var(--s-2); padding: 0.28em 0; border-bottom: 1px dashed var(--line); }
+  .cfg li::before { content: counter(l); grid-row: span 2; color: var(--ink-3); font: 400 10px/1.9 var(--font-mono); text-align: right; }
+  .cfg code { font-family: var(--font-mono); white-space: pre-wrap; color: var(--ink); background: none; padding: 0; }
+  .cfg__note { color: var(--ink-3); font-size: 0.95em; line-height: 1.4; }
+  .topo__note { padding: var(--s-3); border-left: 2px solid var(--warn); background: var(--warn-soft); color: var(--ink-2); }
+  .topo__source { padding: var(--s-2) var(--s-4) var(--s-3); border-top: 1px solid var(--line); margin: 0; }
+
+  @media print {
+    .topo__filters, .topo__panel { display: none; }
+    .topo__body { grid-template-columns: 1fr; }
+    .topo__canvas { border: 0; }
+  }
+</style>
+
+<script>
+  function init(root: HTMLElement) {
+    if (root.dataset.ready) return;
+    root.dataset.ready = '1';
+    const cards = root.querySelectorAll<HTMLElement>('[data-card]');
+    const nodes = root.querySelectorAll<SVGGElement>('[data-node]');
+    const chips = root.querySelectorAll<HTMLButtonElement>('.topo__chip');
+    const links = root.querySelectorAll<SVGGElement>('.link');
+
+    const show = (id: string) => {
+      cards.forEach((c) => (c.hidden = c.dataset.card !== id));
+      nodes.forEach((n) => n.classList.toggle('is-active', n.dataset.node === id));
+      // Mettre en avant les liens de l'équipement choisi
+      links.forEach((l) => l.classList.toggle('is-near', !!id && (l.dataset.ends ?? '').split('|').includes(id)));
+      // Panneau sous le schéma (écran étroit) : l'amener à l'écran
+      const card = root.querySelector<HTMLElement>(`[data-card="${CSS.escape(id)}"]`);
+      if (id && card && card.getBoundingClientRect().top > window.innerHeight) card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    };
+
+    nodes.forEach((n) => {
+      const pick = () => show(n.classList.contains('is-active') ? '' : n.dataset.node!);
+      n.addEventListener('click', pick);
+      n.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); pick(); }
+        if (e.key === 'Escape') show('');
+      });
+    });
+
+    chips.forEach((chip) => {
+      chip.addEventListener('click', () => {
+        const on = chip.getAttribute('aria-pressed') !== 'true';
+        chips.forEach((c) => c.setAttribute('aria-pressed', String(on && c === chip)));
+        const g = on ? chip.dataset.group! : '';
+        if (g) { root.dataset.focus = g; root.style.setProperty('--fc', `var(--topo-${chip.dataset.tone})`); } else delete root.dataset.focus;
+        root.querySelectorAll<SVGGElement>('[data-group]').forEach((el) => {
+          if (el.tagName === 'BUTTON') return;
+          el.classList.toggle('is-on', !!g && el.dataset.group === g);
+        });
+      });
+    });
+  }
+
+  document.addEventListener('astro:page-load', () => {
+    document.querySelectorAll<HTMLElement>('[data-topo]').forEach(init);
+  });
+</script>

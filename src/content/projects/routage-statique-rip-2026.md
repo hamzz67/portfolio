@@ -53,7 +53,19 @@ Affichage et analyse de la table de routage de chaque routeur : quelles routes s
 
 Activation de RIP sur les routeurs en déclarant, pour chacun, **uniquement les réseaux auxquels il est directement connecté** — c’est le principe du protocole : chaque routeur diffuse à ses voisins ce qu’il connaît, et apprend d’eux le reste. La configuration était détaillée pour un routeur et à retrouver seul pour les autres.
 
-Puis l’étude du fonctionnement : observation des échanges RIP entre routeurs, et comportement du protocole **après une modification de la cartographie du réseau** — c’est-à-dire comment les tables se réajustent toutes seules.
+La maquette, reprise dans le schéma ci-dessus : **quatre routeurs Cisco 1841 reliés en anneau** par des liaisons série, chacun desservant un réseau local. Huit réseaux en tout — quatre locaux, quatre liaisons. Sur chaque liaison série, un des deux routeurs joue le rôle d’équipement DCE et fournit l’horloge (`clock rate 64000`) ; sans elle, la liaison ne monte pas.
+
+Côté RIP, j’ai utilisé la **version 2** avec `no auto-summary` : les annonces portent le masque de chaque réseau, ce qui sera indispensable dès que les masques ne seront plus tous identiques (c’est l’objet du troisième TP).
+
+Puis l’étude du fonctionnement : `show ip route` pour vérifier que les réseaux distants apparaissent avec le code **R** (appris par RIP), `debug ip rip` pour voir passer les annonces en direct — coupé aussitôt après, car le débogage charge le routeur — et comportement du protocole **après une modification de la cartographie du réseau**, c’est-à-dire comment les tables se réajustent toutes seules. C’est tout l’intérêt de l’anneau : chaque site est joignable par deux chemins.
+
+| Réseau | Rôle | Adresses |
+| --- | --- | --- |
+| 200.153.1.0/24 à 200.153.4.0/24 | Réseaux locaux des quatre sites | routeur en `.n` (n = numéro du site), poste en `.10` |
+| 200.153.12.0/24 | Liaison Router1 – Router2 | `.1` et `.2` |
+| 200.153.23.0/24 | Liaison Router2 – Router3 | `.2` et `.3` |
+| 200.153.34.0/24 | Liaison Router3 – Router4 | `.3` et `.4` |
+| 200.153.14.0/24 | Liaison Router4 – Router1 | `.4` et `.1` |
 
 ### Sous-réseaux et VLSM
 

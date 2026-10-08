@@ -43,13 +43,28 @@ La contrainte du cahier des charges est d’ailleurs explicite : on veut pouvoir
 
 ## Réalisation
 
-Les trois commutateurs ont été configurés à l’identique, ce qui est la clé du besoin exprimé : les six premiers ports pour le premier service, les six suivants pour le deuxième, les six d’après pour le troisième, deux ports laissés dans le VLAN par défaut pour les ajustements, et les quatre derniers ports en **trunk** pour l’interconnexion entre commutateurs.
+La maquette compte **quatre commutateurs Cisco 2960** : un par étage, et un commutateur central dans le local technique, qui porte les trois serveurs et auquel chaque étage est relié.
+
+Les quatre ont été configurés à l’identique, ce qui est la clé du besoin exprimé : les six premiers ports pour le premier service, les six suivants pour le deuxième, les six d’après pour le troisième, deux ports laissés dans le VLAN par défaut pour les ajustements, et les quatre derniers ports en **trunk** pour l’interconnexion entre commutateurs. Le schéma ci-dessus reprend le réseau tel que je l’ai rendu ; un clic sur un commutateur affiche les commandes tapées, ligne par ligne.
 
 Résultat : un poste déplacé d’un étage à l’autre reste dans son service tant qu’il est brassé sur la bonne plage de ports, sans aucune reconfiguration.
+
+| VLAN | Service | Réseau | Ports d’accès | Postes | Serveur |
+| --- | --- | --- | --- | --- | --- |
+| 110 | Administratif | 192.168.110.0/24 | Fa0/1 – 6 | ADM11, ADM12, ADM21, ADM31 | 192.168.110.200 |
+| 120 | Développement | 192.168.120.0/24 | Fa0/7 – 12 | DEV11, DEV21, DEV22, DEV31 | 192.168.120.200 |
+| 130 | Commercial | 192.168.130.0/24 | Fa0/13 – 18 | COM11, COM21, COM31, COM32 | 192.168.130.200 |
+| — | Interconnexion | — | Fa0/21 – 24 (trunk) | — | — |
 
 La vérification s’est faite dans les deux sens — connectivité **à l’intérieur** d’un VLAN à travers les liens trunk, et **absence** de connectivité entre VLAN, constatée en mode simulation, qui permet de suivre la trame et de voir où elle est arrêtée.
 
 Ce TP porte volontairement sur une segmentation **sans routage** entre les VLAN : les services n’ont aucun besoin de se parler. Le routage inter-VLAN est l’étape suivante du programme.
+
+## Difficultés
+
+Le journal de Packet Tracer garde la trace d’une erreur de ma part : sur le deuxième commutateur, j’ai enchaîné `conf`, `vlan` et `name` **sans être passé en mode privilégié**. L’invite affichait encore `Switch>` ; aucune commande n’a été prise en compte. Je l’ai repéré à l’invite, puis repris la séquence complète avec `enable` et `configure terminal`. Depuis, je lis l’invite avant chaque bloc de commandes : c’est elle qui dit dans quel mode, et sur quel équipement, on se trouve.
+
+Ce qui m’amène à la deuxième remarque, relevée en relisant ma maquette : je n’ai **pas renommé les commutateurs**. Les quatre s’appellent encore `Switch`, si bien que l’invite ne permet pas de savoir sur lequel on travaille. Sur une maquette, c’est sans conséquence ; sur un vrai réseau, `hostname` est la première commande à passer.
 
 ## Ce que j’en retiens
 

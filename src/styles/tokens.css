@@ -39,6 +39,12 @@
   --node: #171716;
   --node-glow: rgb(15 107 79 / 0.35);
 
+  /* Schémas réseau : groupes (VLAN, réseaux). 1 et 2 reprennent accent et signal. */
+  --topo-1: #0f6b4f;
+  --topo-2: #c2571f;
+  --topo-3: #2f5d8a;
+  --topo-4: #7a4d8c;
+
   /* Typographie */
   --font-sans: 'Archivo', 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
   --font-mono: 'Martian Mono', Consolas, Menlo, monospace;
@@ -103,6 +109,10 @@
   --grain-opacity: 0.35;
   --node: #ebe8e0;
   --node-glow: rgb(94 200 155 / 0.4);
+  --topo-1: #5ec89b;
+  --topo-2: #e39a5e;
+  --topo-3: #7fb0e0;
+  --topo-4: #c39ad6;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -127,5 +137,9 @@
     --grain-opacity: 0.35;
     --node: #ebe8e0;
     --node-glow: rgb(94 200 155 / 0.4);
+    --topo-1: #5ec89b;
+    --topo-2: #e39a5e;
+    --topo-3: #7fb0e0;
+    --topo-4: #c39ad6;
   }
 }

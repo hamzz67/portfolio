@@ -4,6 +4,8 @@ import { Image } from 'astro:assets';
 import Base from '@/layouts/Base.astro';
 import Icon from '@/components/Icon.astro';
 import Lightbox from '@/components/Lightbox.astro';
+import NetworkDiagram from '@/components/NetworkDiagram.astro';
+import { TOPOLOGIES } from '@/data/topologies';
 import { CATEGORIES, KINDS, STATUSES, BTS_BLOCS, type Category, type Kind, type Status, type BtsBloc } from '@/data/taxonomy';
 import { getProjects, getProjectRef, getNeighbours, getPresentationOrder } from '@/lib/projects';
 import { formatMonthCap, isoDate, slugify } from '@/lib/format';
@@ -17,6 +19,7 @@ export async function getStaticPaths() {
 const { project } = Astro.props;
 const d = project.data;
 const { Content, headings } = await render(project);
+const topology = TOPOLOGIES[project.id];
 const toc = headings.filter((h) => h.depth === 2);
 const ref = await getProjectRef(project);
 const { prev, next } = await getNeighbours(project);
@@ -140,6 +143,8 @@ const jsonLd = {
       </aside>
 
       <div class="fiche__main">
+        {topology && <NetworkDiagram topology={topology} />}
+
         <div class="prose" data-presentation-content>
           <Content />
         </div>
