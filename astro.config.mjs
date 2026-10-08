@@ -3,16 +3,56 @@ import { defineConfig, fontProviders } from 'astro/config';
 import sitemap from '@astrojs/sitemap';
 
 /**
- * URL publique du site.
+ * URL publique du site. Elle sert aux URL canoniques, aux balises Open Graph,
+ * au sitemap et au flux RSS.
  *
- * TODO : remplacer par votre domaine une fois acheté (ex. 'https://hamzajallabi.fr').
- * Elle sert au sitemap, aux balises Open Graph et aux URL canoniques.
- * Peut aussi être fournie par la variable d'environnement SITE_URL (voir DEPLOYMENT.md).
+ * Fournie par la variable d'environnement SITE_URL (Cloudflare Pages), avec
+ * repli sur l'adresse réelle du site. Si un nom de domaine est acheté plus
+ * tard, changer DEFAUT ici *et* la variable dans Cloudflare.
+ *
+ * ⚠️ GARDE-FOU. Le 7 octobre 2026, SITE_URL valait `https://portfolio.pages.dev`
+ *    — le portfolio de quelqu'un d'autre. Chaque page du site a donc déclaré
+ *    pendant des semaines le domaine d'un tiers comme URL canonique, ce qui
+ *    revient à dire aux moteurs de recherche « la vraie version de cette page
+ *    est ailleurs ». Une valeur manifestement fausse est désormais ignorée au
+ *    profit du repli, avec un avertissement visible dans le journal de build :
+ *    mieux vaut un site correct et un avertissement qu'un déploiement bloqué.
  */
-const SITE_URL = process.env.SITE_URL ?? 'https://example.com';
+const DEFAUT = 'https://hamzzportfolio.pages.dev';
+const SITE_URL = process.env.SITE_URL?.trim().replace(/\/$/, '') || DEFAUT;
+
+const hote = (() => {
+  try {
+    return new URL(SITE_URL).host;
+  } catch {
+    throw new Error(`SITE_URL n'est pas une URL valide : « ${SITE_URL} ». Attendu : ${DEFAUT}`);
+  }
+})();
+
+/*
+ * Un sous-domaine pages.dev qui n'est pas le nôtre appartient à quelqu'un
+ * d'autre ; example.com et localhost ne sont pas publiables. Dans ces cas on
+ * ignore la variable plutôt que de publier des URL canoniques fausses.
+ */
+const suspect =
+  (hote.endsWith('.pages.dev') && hote !== new URL(DEFAUT).host) ||
+  hote === 'example.com' ||
+  hote.startsWith('localhost');
+
+const SITE = suspect ? DEFAUT : SITE_URL;
+
+if (suspect) {
+  console.warn(
+    `
+⚠  SITE_URL vaut « ${SITE_URL} », qui n'est pas ce site : valeur ignorée, ${DEFAUT} utilisé.
+` +
+      `   Corriger la variable dans Cloudflare Pages → Settings → Variables and Secrets.
+`,
+  );
+}
 
 export default defineConfig({
-  site: SITE_URL,
+  site: SITE,
   output: 'static',
   trailingSlash: 'never',
   build: {

@@ -18,7 +18,7 @@ export const profile = {
    * « je conçois, configure et sécurise » se contrôle en ouvrant les fiches.
    */
   tagline:
-    'Je conçois, configure et sécurise des infrastructures réseau et systèmes. BTS SIO SISR, major de promotion.',
+    'Je conçois, configure et sécurise des infrastructures réseau et systèmes.',
   role: 'Étudiant en BTS SIO SISR',
   school: 'Lycée René Cassin',
   city: 'Strasbourg',
